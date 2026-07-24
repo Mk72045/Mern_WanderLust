@@ -1,14 +1,14 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import api from "../../assets/axios.js";
 
 function Edit() {
   const listing = useLocation().state.listing;
   // console.log(listing._id);
 
   async function mySubmitHandler(data) {
-    axios.put(`/api/show/${listing._id}/edit`, {
+    api.put(`/api/show/${listing._id}/edit`, {
       title: data.title,
       description: data.description,
       price: data.price,

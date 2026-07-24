@@ -1,6 +1,5 @@
-import React from "react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import api from "../../assets/axios.js";
 
 function Login() {
   async function mySubmitHandler(data) {
@@ -8,7 +7,7 @@ function Login() {
     console.log("data is submitted", data);
 
     try {
-      const response = await axios.post("/api/login", {
+      const response = await api.post("/api/login", {
         email: data.email,
         password: data.password,
       });

@@ -1,7 +1,7 @@
 // importing packages
 import { useEffect, useState } from "react";
 // import toast, { Toaster } from "react-hot-toast";
-import axios from "axios";
+import api from "../../assets/axios.js";
 import { NavLink } from "react-router-dom";
 
 // importin Files
@@ -14,12 +14,12 @@ function Dasboard() {
   const [allListings, setAllListings] = useState([]);
 
   useEffect(() => {
-    axios
+    api
       .get("/api/listings")
       .then((res) => {
-        console.log("Response:", res);
-        console.log("Data:", res.data);
-        console.log("Is array?", Array.isArray(res.data));
+        // console.log("Response:", res);
+        // console.log("Data:", res.data);
+        // console.log("Is array?", Array.isArray(res.data));
         setAllListings(res.data);
       })
       .catch((err) => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../assets/axios.js";
 
 function Show() {
   const [listing, setListing] = useState(null);
@@ -8,7 +8,7 @@ function Show() {
   const { id } = useParams();
 
   useEffect(() => {
-    axios
+    api
       .get(`/api/show/${id}`)
       .then((res) => {
         setListing(res.data.listing);

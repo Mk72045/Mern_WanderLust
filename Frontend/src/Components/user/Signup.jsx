@@ -1,5 +1,4 @@
-import React from "react";
-import axios from "axios";
+import api from "../../assets/axios.js";
 import { useForm } from "react-hook-form";
 
 function SignUp() {
@@ -12,7 +11,7 @@ function SignUp() {
 
   const submitHandle = async (data) => {
     try {
-      const res = await axios.post("/api/signup", {
+      const res = await api.post("/api/signup", {
         username: data.username,
         email: data.email,
         password: data.password,

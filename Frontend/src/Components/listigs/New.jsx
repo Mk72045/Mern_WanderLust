@@ -1,10 +1,10 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import api from "../../assets/axios.js";
 
 function New() {
   async function mySubmitHandler(data) {
-    await axios.post("/api/newListing", {
+    await api.post("/api/newListing", {
       title: data.title,
       description: data.description,
       price: data.price,
