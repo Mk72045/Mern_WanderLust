@@ -8,14 +8,5 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    server: {
-      proxy: {
-        "/api": {
-          target: env.VITE_API_URL || "http://localhost:8080",
-          changeOrigin: true,
-          secure: false,
-        },
-      },
-    },
   };
 });
