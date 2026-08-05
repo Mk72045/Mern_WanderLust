@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const PRODUCTION_API_URL = "https://mern-wanderlust-4i7c.onrender.com";
-const DEVELOPMENT_API_URL = "http://localhost:8080";
+const DEVELOPMENT_API_URL = "http://localhost:5000";
 
 const api = axios.create({
   baseURL:

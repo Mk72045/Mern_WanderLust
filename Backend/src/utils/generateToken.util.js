@@ -1,12 +1,15 @@
-// // utils/generateToken.js
-// import jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
-// const generateToken = (adminId) => {
-//   return jwt.sign(
-//     { id: adminId }, // data stored inside the token
-//     process.env.JWT_SECRET, // secret key that signs it, so it can't be faked
-//     { expiresIn: "7d" } // token becomes invalid after 7 days, admin logs in again
-//   );
-// };
+const generateToken = (userId) => {
+  return jwt.sign(
+    {
+      id: userId,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "7d",
+    }
+  );
+};
 
-// export default generateToken;
+export default generateToken;

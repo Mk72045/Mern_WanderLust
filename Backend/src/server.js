@@ -4,182 +4,91 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 import dotenv from "dotenv";
 dotenv.config();
 
-// console.log("file form .env", process.env.Mongo_Atlas_Url);
-const Mongo_Url = process.env.Mongo_Atlas_Url;
+// ========== fetching env file data ==========
+const Mongo_Atlas_Url = process.env.Mongo_Atlas_Url;
 const PORT = process.env.PORT || 8080;
 const CLIENT_URL = process.env.CLIENT_URL;
-console.log("url is: ", CLIENT_URL);
-console.log("port: ", PORT);
+const COOKIE_SECRET = process.env.COOKIE_SECRET;
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const COOKIE_MAX_AGE = process.env.COOKIE_MAX_AGE;
 
-// packages
+// ========== importing packages ==========
 import express from "express";
-import cors from "cors";
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+import bycrypt from "bcrypt";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import session from "express-session";
+// import flash from "connect-flash";
 
-// importing files
-import Listings from "./models/listings.js";
-import User from "./models/users.js";
-import Review from "./models/reviews.js";
+// ========== importing files ==========
 
-const app = express();
-app.use(cors({ origin: CLIENT_URL }));
+// ===== routes =====
+import listingRoutes from "./routes/listing.routes.js";
+import reviewRoutes from "./routes/review.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import otpRoute from "./routes/otp.route.js";
 
-// mongo and port connection
-const connection = async () => {
-  await mongoose.connect(Mongo_Url);
-};
+// ===== middlewares =====
+import ExpressError from "./utils/ExpressError.util.js";
 
-connection()
-  .then(async () => {
-    await app.listen(PORT, () => {
-      console.log("connected to port");
+// ===== models =====
+import Listing from "./models/listing.model.js";
+
+// ========== database and port connection ==========
+mongoose
+  .connect(Mongo_Atlas_Url)
+  .then(() => {
+    console.log("Database is connected successfully");
+    app.listen(PORT, (req, res) => {
+      console.log(`Server is conencted to the PORT: ${PORT}`);
+      console.log("All setup Done");
     });
-    console.log("all setup done");
   })
   .catch((err) => {
-    console.log("database connection is failed: ", err);
+    console.log("Database connection failed: ", err);
   });
 
-// middleware
+// ========== some usefulls ==========-
+const sessionOptions = {
+  secret: SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    expires: parseInt(COOKIE_MAX_AGE),
+    httpOnly: true,
+  },
+};
+
+// ========== some configration ==========
+const app = express();
+app.use(cors({ origin: CLIENT_URL }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser(COOKIE_SECRET));
+app.use(session(sessionOptions));
+// app.use(flash());
 
-// get routes
-app.get("/api/listings", async (req, res) => {
-  console.log(`[${req.method}] ${req.originalUrl}`);
-  const data = await Listings.find({});
-  res.json(data);
-});
+// ========== Different Paths ==========
+app.use("/api/listings", listingRoutes);
+app.use("/api/listings/:listingId/reviews", reviewRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api", otpRoute);
 
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "OK",
+// ========== diffreent route error handling function ==========
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    message: "Page Not Found",
   });
 });
 
-app.get("/api/signup", (req, res) => {
-  console.log(req.body.user, "is saved");
-  res.send("you are at the signup page.");
-});
-
-app.get("/api/newListing", (req, res) => {
-  console.log(`[${req.method}] ${req.originalUrl}`);
-  res.send("now you are at the new Listing page");
-});
-
-app.get("/api/login", (req, res) => {
-  console.log(req.params);
-});
-
-app.get("/api/show/:id", async (req, res) => {
-  try {
-    // console.log("start show page");
-    const id = req.params.id;
-    // console.log(id);
-
-    const listing = await Listings.findById(id);
-
-    if (!listing) {
-      return res.status(404).json({
-        success: false,
-        message: "Listing not found",
-      });
-    }
-
-    return res.status(202).json({ success: true, message: "Listing is shown", listing: listing });
-  } catch (err) {
-    res.status(404).json({
-      success: false,
-      message: "something went wrong in show/id route",
-    });
-  }
-});
-
-// post routes
-
-app.post("/api/login", async (req, res) => {
-  try {
-    console.log(req.body.email);
-
-    const user = await User.findOne({ email: req.body.email });
-
-    if (!user) {
-      console.log("user not found");
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    console.log("user found");
-
-    const isMatch = await bcrypt.compare(req.body.password, user.password);
-
-    console.log("pass matched");
-
-    if (!isMatch) {
-      console.log("password is not matched");
-      return res.send(`Incorrect password for the user: ${user.username}`);
-    }
-    console.log("login successfully");
-    return res.status(201).json({
-      success: true,
-      username: user.username,
-      message: "Login successful",
-    });
-  } catch (err) {
-    return res.status(404).json({
-      success: false,
-      message: `Login failed: ${err}`,
-    });
-  }
-});
-
-app.post("/api/signup", async (req, res) => {
-  const hashedPassword = await bcrypt.hash(req.body.password, 12);
-
-  const newUser = new User({
-    username: req.body.username,
-    email: req.body.email,
-    password: hashedPassword,
+// ========== to handle all errors ==========
+app.use((err, req, res, next) => {
+  let { status = 500, message = "Something went wrong", name = "Not Found" } = err;
+  res.status(status).json({
+    name: name,
+    success: false,
+    message: message,
   });
-
-  await newUser.save();
-  res.status(201).json({
-    success: true,
-    message: "Signup successful",
-  });
-});
-
-app.post("/api/newListing", async (req, res) => {
-  console.log(req.body);
-  res.send("new listing data is found");
-});
-
-// put routes
-
-app.put("/api/show/:id/edit", async (req, res) => {
-  try {
-    // console.log(req.body);
-    // console.log(req.params.id);
-    const id = req.params.id;
-    const data = req.body;
-    const listing = await Listings.findById(id);
-
-    if (!listing) {
-      return res.status(404).json({ success: false, message: "Listing Not Found" });
-    }
-
-    listing.title = data.title;
-    listing.description = data.description;
-    listing.price = data.price;
-    listing.country = data.country;
-    listing.location = data.location;
-
-    await listing.save();
-
-    return res.status(202).json({ success: true, message: "listing edited successfully" });
-  } catch (err) {
-    return res.status(404).json({ success: false, message: "listing edition is failed" });
-  }
 });

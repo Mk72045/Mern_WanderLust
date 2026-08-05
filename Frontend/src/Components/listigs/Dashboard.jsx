@@ -18,9 +18,10 @@ function Dasboard() {
       .get("/api/listings")
       .then((res) => {
         // console.log("Response:", res);
-        // console.log("Data:", res.data);
+        console.log("Data:", res.data);
+        console.log("Data:", res.data.listings);
         // console.log("Is array?", Array.isArray(res.data));
-        setAllListings(res.data);
+        setAllListings(res.data.listings);
       })
       .catch((err) => {
         console.log("there is not data", err);
