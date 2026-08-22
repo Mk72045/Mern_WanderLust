@@ -1,4 +1,4 @@
-import ExpressError from "../utils/ExpressError.util.js";
+import ExpressError from "../utils/expressError.util.js";
 import {
   ListingSchema,
   ReviewSchema,
@@ -16,6 +16,7 @@ export const joiListingValidation = (req, res, next) => {
 };
 
 export const joiReviewValidation = (req, res, next) => {
+  console.log("kya hua");
   let { error } = ReviewSchema.validate(req.body);
 
   if (error) {

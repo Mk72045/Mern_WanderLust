@@ -6,12 +6,12 @@ export const showAllReveiws = async (req, res, next) => {
 
   let allReviews = await Review.find({ author: listingId });
 
-  if (allReviews.length === 0) {
-    return res.status(404).json({
-      success: false,
-      message: "Threr are not any review",
-    });
-  }
+  // if (allReviews.length === 0) {
+  //   return res.status(404).json({
+  //     success: false,
+  //     message: "Threr are not any review",
+  //   });
+  // }
 
   res.status(200).json({
     success: true,
@@ -21,6 +21,8 @@ export const showAllReveiws = async (req, res, next) => {
 };
 
 export const createReview = async (req, res) => {
+  console.log("i am entered");
+  
   let { listingId } = req.params;
   let { rating, comment } = req.body.Review;
 

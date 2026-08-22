@@ -1,20 +1,18 @@
-// import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
-// import Navbar from "../components/common/navbar/navbar";
-// import Footer from "../components/common/footer/footer";
+import Navbar from "../components/common/navbar";
+import Footer from "../components/common/footer";
 
-// const MainLayout = () => {
-//   return (
-//     <>
-//       <Navbar />
+const MainLayout = () => {
+  return (
+    <div className="min-h-screen flex flex-col ">
+      <Navbar />
+      <main className="flex-1 ">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  );
+};
 
-//       <main className="min-h-screen">
-//         <Outlet />
-//       </main>
-
-//       <Footer />
-//     </>
-//   );
-// };
-
-// export default MainLayout;
+export default MainLayout;

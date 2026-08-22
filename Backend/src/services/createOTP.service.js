@@ -1,12 +1,12 @@
 import OTP from "../models/otp.model.js";
-import  optGenerator  from "../utils/optGenerator.util.js";
+import  otpGenerator  from "../utils/otpGenerator.util.js";
 import bcrypt from "bcrypt";
 
 // ===== storing otp in database =====
 
 export const createOTP = async (email) => {
   // Generate plain OTP
-  const otp = optGenerator();
+  const otp = otpGenerator();
 
   // Hash the OTP
   const hashedOTP = await bcrypt.hash(otp, 10);

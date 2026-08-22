@@ -27,10 +27,10 @@ import session from "express-session";
 import listingRoutes from "./routes/listing.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 import userRoutes from "./routes/user.routes.js";
-import otpRoute from "./routes/otp.route.js";
+import otpRoute from "./routes/otp.routes.js";
 
 // ===== middlewares =====
-import ExpressError from "./utils/ExpressError.util.js";
+import ExpressError from "./utils/expressError.util.js";
 
 // ===== models =====
 import Listing from "./models/listing.model.js";
@@ -62,7 +62,7 @@ const sessionOptions = {
 
 // ========== some configration ==========
 const app = express();
-app.use(cors({ origin: CLIENT_URL }));
+app.use(cors({ origin: CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(COOKIE_SECRET));

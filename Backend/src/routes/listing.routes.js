@@ -13,13 +13,13 @@ import {
 
 // ---------- validated middlewares ----------
 import { joiListingValidation } from "../middlewares/joiSchema.middleware.js";
-import protect from "../middlewares/protect.mIddleware.js";
+import protect from "../middlewares/protect.middleware.js";
 
 const router = express.Router({ mergeParams: true });
 
 router
   .route("/")
-  .get(protect, asyncHandler(showAllListings))
+  .get(asyncHandler(showAllListings))
   .post(joiListingValidation, protect, asyncHandler(addNewListing));
 
 router

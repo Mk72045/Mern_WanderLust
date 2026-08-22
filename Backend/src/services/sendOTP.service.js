@@ -10,7 +10,7 @@ const OTP_EXPIRY_MINUTES = process.env.OTP_EXPIRY_MINUTES;
 import nodemailer from "nodemailer";
 
 // ========== files and functions importing ==========
-import emailTemplate from "../Scripts/emailTemplate.script.js";
+import emailTemplate from "../scripts/emailTemplate.script.js";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
