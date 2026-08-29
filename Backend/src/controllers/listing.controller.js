@@ -1,5 +1,4 @@
 import Listing from "../models/listing.model.js";
-import ExpressError from "../utils/expressError.util.js";
 
 export const showAllListings = async (req, res, next) => {
   const listings = await Listing.find({});
