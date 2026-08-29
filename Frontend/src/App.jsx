@@ -11,7 +11,7 @@ import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
 import ShowListing from "./components/listing/showListing";
 import EditListing from "./components/listing/showListing/EditListing";
-import NewListing from "./components/listing/NewListing";
+import NewListing from "./pages/NewListing";
 
 function App() {
   return (
