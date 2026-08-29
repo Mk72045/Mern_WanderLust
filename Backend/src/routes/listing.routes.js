@@ -13,7 +13,7 @@ import {
 
 // ========== validated middlewares ==========
 import { joiListingValidation } from "../middlewares/joiSchema.middleware.js";
-import protect from "../middlewares/protect.middleware.js";
+import protect from "../middlewares/protect.mI.js";
 import { uploadListingImage } from "../middlewares/cloudinaryUpload.middleware.js";
 
 const router = express.Router({ mergeParams: true });
