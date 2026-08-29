@@ -1,22 +1,47 @@
 import useFetch from "../../../hooks/useFetch.hook";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ReviewHero from "./review";
-
+import { H1CenterText } from "../../ui/Texts";
+import { BlackButton, GreenButton, RedButton } from "../../ui/Button";
+import api from "../../../api/axios";
 
 function ShowListing() {
   const { listingId } = useParams();
+  const navigation = useNavigate();
+  const location = useLocation();
 
-  const { data, loading, error } = useFetch(`/listings/${listingId}`);
+  const { data, loading, error } = useFetch(
+    `/listings/${listingId}`,
+    location.state?.update,
+  );
 
   if (loading) {
-    return <h1>Loading...</h1>;
+    return <H1CenterText text="Loading..." />;
   }
 
   if (error) {
-    return <h1>Listing not found</h1>;
+    console.log("error in showListing is: ", error);
+    return <H1CenterText text="Listing not found" />;
   }
 
-  // console.log(data.listing);
+  function handleListingEdit() {
+    navigation(`/listings/${listingId}/editListing`);
+  }
+
+  async function handleListingDelete() {
+    await api.delete(`/listings/${listingId}`);
+
+    navigation("/", {
+      state: {
+        update: Date.now(),
+      },
+    });
+  }
+
+  function handleBack() {
+    navigation("/");
+  }
+
   return (
     <>
       {data?.listing && (
@@ -41,6 +66,22 @@ function ShowListing() {
             <p className="font-semibold py-1">
               <b>Location: </b> {data.listing.location}
             </p>
+          </div>
+
+          <div className="flex justify-between  p-2 mb-8">
+            <div className="tt">
+              <BlackButton text="Back" onClick={handleBack} style="mr-4" />
+            </div>
+
+            <div className="tt">
+              <GreenButton
+                text="Edit"
+                onClick={handleListingEdit}
+                style="mr-4"
+              />
+
+              <RedButton text="Delete" onClick={handleListingDelete} />
+            </div>
           </div>
 
           <ReviewHero />

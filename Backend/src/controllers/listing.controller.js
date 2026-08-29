@@ -17,10 +17,10 @@ export const showAllListings = async (req, res, next) => {
   });
 };
 
-// export const addListingForm = async (req, res, next) => {};
-
 export const addNewListing = async (req, res, next) => {
-  const { title, description, price, location, country, image } = req.body.Listing;
+  const { title, description, price, location, country } = req.body.Listing;
+
+  const image = req.file;
 
   const newListing = new Listing({
     title,
@@ -30,7 +30,7 @@ export const addNewListing = async (req, res, next) => {
     country,
     image: {
       url: image
-        ? image.url
+        ? image.path
         : "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/htl-imgs/201410201436324827-36f63773-bdc9-4e5c-baef-10cba1e4575d.jpg",
       filename: image ? image.filename : "default-file",
     },
@@ -48,23 +48,28 @@ export const addNewListing = async (req, res, next) => {
 // export const editListingForm = async (req, res, next) => {};
 
 export const editListing = async (req, res, next) => {
-  let { listingId } = req.params;
+  const { listingId } = req.params;
 
-  let { title, description, price, location, country, image } = req.body.Listing;
+  const { title, description, price, location, country } = req.body.Listing;
 
-  let upadatListing = {
+  const image = req.file;
+
+  const upadatListing = {
     title,
     description,
     price,
     location,
     country,
-    image: {
-      url: image?.url,
-      filename: image?.filename,
-    },
   };
 
-  let result = await Listing.findByIdAndUpdate(listingId, upadatListing);
+  if (image) {
+    upadatListing.image = {
+      url: image.path,
+      filename: image.filename,
+    };
+  }
+
+  const result = await Listing.findByIdAndUpdate(listingId, upadatListing);
 
   if (!result) {
     return res.status(404).json({

@@ -12,11 +12,6 @@ export const ListingSchema = Joi.object({
       "any.required": "Description is required",
     }),
 
-    image: Joi.object({
-      url: Joi.string().allow(""),
-      filename: Joi.string().allow(""),
-    }),
-
     price: Joi.number().min(0).default(0).messages({
       "number.base": "Price must be a number",
       "number.min": "Price cannot be negative",
@@ -32,6 +27,7 @@ export const ListingSchema = Joi.object({
       "any.required": "Country is required",
     }),
   }).required(),
+  image: Joi.object().optional(),
 });
 
 export const ReviewSchema = Joi.object({

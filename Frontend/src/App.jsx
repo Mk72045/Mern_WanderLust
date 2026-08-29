@@ -1,5 +1,4 @@
 //rfce
-// import packages
 import "./App.css";
 // import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
@@ -61,11 +60,17 @@ import "./App.css";
 
 // export default App;
 
+// ============ packages ==========
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// ==========  layout file ==========
 import MainLayout from "./layouts/MainLayout";
 
+// ==========  route files ==========
 import Home from "./pages/Home";
 import ShowListing from "./components/listing/showListing";
+import EditListing from "./components/listing/showListing/EditListing";
+import NewListing from "./components/listing/NewListing";
 
 function App() {
   return (
@@ -74,6 +79,11 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/listings/:listingId" element={<ShowListing />} />
+          <Route
+            path="/listings/:listingId/editListing"
+            element={<EditListing />}
+          />
+          <Route path="/newListing" element={<NewListing />} />
         </Route>
       </Routes>
     </BrowserRouter>

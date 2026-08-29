@@ -2,6 +2,8 @@ import useFetch from "../../../../hooks/useFetch.hook";
 import ReviewForm from "./ReviewForm";
 import useAuth from "../../../../hooks/useAuth.hook";
 import ReviewCard from "./ReviewCard";
+import { H1CenterText } from "../../../ui/Texts";
+
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 
@@ -15,11 +17,11 @@ function ReviewHero() {
     refresh,
   );
 
-  if (loading) return <h1>Loading...</h1>;
+  if (loading) return <H1CenterText text="Loading..." />;
 
   if (error) {
-    console.log("reveiw error is: ", error);
-    return <h2>Couldn't load the reviews</h2>;
+    console.log("error in reviewHero is: ", error);
+    return <H1CenterText text="Couldn't load the reviews" />;
   }
 
   return (
@@ -39,6 +41,7 @@ function ReviewHero() {
                 key={review._id}
                 review={review}
                 // currentAuthor={user}
+                setRefresh={setRefresh}
               />
             ))}
       </div>

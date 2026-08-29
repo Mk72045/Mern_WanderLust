@@ -5,7 +5,7 @@ const navigationLinks = [
   },
   {
     name: "Add Listing",
-    path: "/addListing",
+    path: "/newListing",
   },
   {
     name: "About",

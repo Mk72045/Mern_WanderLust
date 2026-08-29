@@ -1,14 +1,29 @@
 import { useForm } from "react-hook-form";
-import { ErrorText, inputStyle, Label } from "./NewListingHelper";
-import { BlackButton, GreenButton } from "../ui/Button";
-import { useNavigate } from "react-router-dom";
-import Button from "@mui/material/Button";
+import useFetch from "../../../hooks/useFetch.hook";
+import { H1CenterText } from "../../ui/Texts";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect } from "react";
 import { useState } from "react";
-import { compressImageTo1MB } from "./showListing/imageReducer";
-import api from "../../api/axios";
+import { ErrorText, inputStyle, Label } from "../NewListingHelper";
+import Button from "@mui/material/Button";
+import { BlackButton, GreenButton } from "../../ui/Button";
+import { compressImageTo1MB } from "./imageReducer";
+import api from "../../../api/axios";
 
-function NewListing() {
+function EditListing() {
+  const { listingId } = useParams();
+  const [preview, setPreview] = useState({
+    url: null,
+    filename: null,
+  });
+
   const navigate = useNavigate();
+  const {
+    data,
+    loading,
+    error: fetchError,
+  } = useFetch(`/listings/${listingId}`);
+
   const initialState = {
     title: "",
     description: "",
@@ -18,8 +33,6 @@ function NewListing() {
     image: null,
   };
 
-  const [image, setImage] = useState({ url: null, filename: null });
-
   const {
     register,
     handleSubmit,
@@ -28,55 +41,86 @@ function NewListing() {
     formState: { errors, isDirty },
   } = useForm({ defaultValues: initialState });
 
-  const onSubmit = async (data) => {
+  useEffect(() => {
+    if (!data?.listing) return;
+
+    // console.log("data found:", data);
+
+    // Existing image
+    setPreview(data.listing.image);
+
+    // Fill form with existing listing data
+    reset({
+      title: data.listing.title,
+      description: data.listing.description,
+      price: data.listing.price,
+      location: data.listing.location,
+      country: data.listing.country,
+      image: null,
+    });
+  }, [data, reset]);
+
+  if (loading) {
+    return <H1CenterText text="Loading..." />;
+  }
+
+  if (fetchError) {
+    console.log("error in EditListing is: ", fetchError);
+    return <H1CenterText text="Listing not found" />;
+  }
+
+  async function onSubmit(formData) {
     try {
-      const formData = new FormData();
+      const sendFormData = new FormData();
 
       const Listing = {
-        title: data.title,
-        description: data.description,
-        price: data.price,
-        location: data.location,
-        country: data.country,
+        title: formData.title,
+        description: formData.description,
+        price: formData.price,
+        location: formData.location,
+        country: formData.country,
       };
 
-      formData.append("Listing", JSON.stringify(Listing));
+      sendFormData.append("Listing", JSON.stringify(Listing));
 
-      if (data.image instanceof File) {
-        formData.append("image", data.image);
+      // Only send image if a new image was selected
+      if (formData.image instanceof File) {
+        sendFormData.append("image", formData.image);
       }
 
-      await api.post("/listings", formData);
+      // Debug FormData
+      for (const [key, value] of sendFormData.entries()) {
+        console.log(key, value);
+      }
 
-      setImage({
-        url: null,
-        filename: null,
-      });
+      const response = await api.put(`/listings/${listingId}`, sendFormData);
+
+      console.log("Update successful:", response.data);
 
       reset();
-      navigate("/");
-    } catch (e) {
-      console.log("error at submission of newListing", e);
+      navigate(`/listings/${listingId}`);
+    } catch (error) {
+      console.error("Update listing failed:", error);
+      console.error("Backend response:", error.response?.data);
     }
-  };
+  }
 
   async function handleImageChange(e) {
     const file = e.target.files?.[0];
-
     if (!file) return;
 
     const image1mb = await compressImageTo1MB(file);
-
     const previewUrl = URL.createObjectURL(image1mb);
 
-    setImage({ url: previewUrl, filename: image1mb.name });
-
-    setValue("image", image1mb, { shouldDirty: true });
+    setPreview({ url: previewUrl, filename: image1mb.name });
+    setValue("image", image1mb, {
+      shouldDirty: true,
+    });
   }
 
   return (
     <div className="flex flex-col items-center w-full my-8">
-      <h1>AddListing</h1>
+      <h1>Edit Listing </h1>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="p-4 flex flex-col gap-10 w-[80%] min-w-85 max-w-200"
@@ -171,11 +215,11 @@ function NewListing() {
           />
         </div>
 
-        {image?.url && (
+        {data?.listing?.image && (
           <div className="w-full pl-2">
             <img
-              src={image.url}
-              alt={image.filename}
+              src={preview.url}
+              alt={preview.filename}
               className="rounded-xl h-60 w-[80%] min-w-60 max-w-100 opacity-70"
             />
           </div>
@@ -218,9 +262,9 @@ function NewListing() {
                 truncate
                 whitespace-nowrap
               "
-              title={image?.filename ? image.filename : ""}
+              title={preview?.filename ? preview.filename : ""}
             >
-              {image?.filename ? image.filename : "No file choosen"}
+              {preview?.filename ? preview.filename : "No file choosen"}
             </span>
           </div>
 
@@ -238,7 +282,7 @@ function NewListing() {
           <BlackButton text="Cancle" onClick={() => navigate("/")} />
 
           {isDirty && (
-            <GreenButton text="AddListing" type="Submit" style="ml-4" />
+            <GreenButton text="Edit Listing" type="submit" style="ml-4" />
           )}
         </div>
       </form>
@@ -246,4 +290,4 @@ function NewListing() {
   );
 }
 
-export default NewListing;
+export default EditListing;

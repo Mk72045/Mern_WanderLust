@@ -1,15 +1,23 @@
 import ListingCard from "../listing/ListingCard";
 import useFetch from "../../hooks/useFetch.hook";
+import { H1CenterText } from "../ui/Texts";
+// import { useState } from "react";
+import { useLocation } from "react-router-dom";
 
 function HomeHero() {
-  const { data, loading, error } = useFetch("/listings");
+  // const [refresh, setRefresh] = useState(false);
+  const location = useLocation();
+ 
+  const { data, loading, error } = useFetch(
+    "/listings",
+    location.state?.update,
+  );
 
-  if (loading) {
-    return <h1>Loading...</h1>;
-  }
+  if (loading) return <H1CenterText text="Loading..." />;
 
   if (error) {
-    return <h1>Could not fetch listings</h1>;
+    console.log("error in HomeHero is: ", error);
+    return <H1CenterText text="Couldn't load the listings" />;
   }
 
   return (

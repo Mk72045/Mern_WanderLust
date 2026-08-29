@@ -47,10 +47,10 @@ function ReviewForm({ setRefresh }) {
   return (
     <div className="pl-1 mt-10">
       <form action="" onSubmit={handleSubmit}>
-        <div className="mb-8">
+        <div className="mb-4">
           <Box sx={{ width: "100%" }}>
             <TextField
-              minRows={3}
+              minRows={1}
               multiline
               error={error}
               fullWidth
@@ -70,7 +70,7 @@ function ReviewForm({ setRefresh }) {
             />
           </Box>
 
-          <div className="my-8 flex items-center">
+          <div className="mt-8 mb-4 flex items-center">
             Rating: &nbsp;
             <Rating
               name="rating"
