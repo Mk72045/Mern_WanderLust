@@ -6,6 +6,9 @@ import OTP from "../models/otp.model.js";
 export const otpVerification = async (req, res, next) => {
   let { username, otp } = req.body.OTP;
 
+  username = username.trim();
+  otp = otp.trim();
+
   let userData = await OTP.findOne({ username });
 
   if (!userData) {

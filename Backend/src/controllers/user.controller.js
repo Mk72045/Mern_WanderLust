@@ -18,7 +18,7 @@ import generateToken from "../utils/generateToken.util.js";
 export const signUp = async (req, res) => {
   console.log("in signup function at use.controller file: ", req.body);
 
-  let { username, opt } = req.body.OTP;
+  let { username } = req.body.OTP;
 
   // checking for existing user
   let user = await User.findOne({ username });

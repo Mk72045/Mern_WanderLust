@@ -21,7 +21,7 @@ const addNewOTP = async (req, res) => {
 
   if (!username || !password) {
     return res.status(400).json({
-      success: true,
+      success: false,
       message: "fill all the required areas",
     });
   }
@@ -29,13 +29,11 @@ const addNewOTP = async (req, res) => {
   const user = await User.findOne({ username });
 
   if (user) {
-    return res.status(400).json({
+    return res.status(200).json({
       success: false,
       message: "User already exists",
     });
   }
-
-  const otp = await createOTP(username);
 
   const tempUser = await TempUser.findOne({ username });
 
@@ -44,18 +42,14 @@ const addNewOTP = async (req, res) => {
 
     await tempUser.save();
 
-    const oldOTP = await OTP.findOne({ username });
-
-    oldOTP.expireAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
-
-    await sendOTP(username, otp);
-
     return res.status(200).json({
       success: true,
       message: "User already exists in temp database",
       tempUser,
     });
   }
+
+  const otp = await createOTP(username);
 
   await sendOTP(username, otp);
 
