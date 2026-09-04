@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
+import useAuth from "../hooks/useAuth.hook.js";
 
 // ========== components &
 import {
@@ -15,6 +16,7 @@ import { compressImageTo1MB } from "../components/listing/showListing/imageReduc
 import api from "../api/axios.js";
 
 function NewListing() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const initialState = {
     title: "",
@@ -37,6 +39,11 @@ function NewListing() {
 
   const onSubmit = async (data) => {
     try {
+      if (!user) {
+        navigate("/");
+        return;
+      }
+
       const formData = new FormData();
 
       const Listing = {
@@ -247,6 +254,9 @@ function NewListing() {
           {isDirty && (
             <GreenButton text="AddListing" type="Submit" style="ml-4" />
           )}
+        </div>
+        <div className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+          You must be logged in to add a listing!
         </div>
       </form>
     </div>
