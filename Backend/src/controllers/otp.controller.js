@@ -7,7 +7,6 @@ const OTP_EXPIRY_MINUTES = process.env.OTP_EXPIRY_MINUTES;
 import bcrypt from "bcrypt";
 
 // ========== files & functions ==========
-import OTP from "../models/otp.model.js";
 import User from "../models/user.model.js";
 import sendOTP from "../services/sendOTP.service.js";
 import { createOTP } from "../services/createOTP.service.js";
@@ -42,7 +41,7 @@ const addNewOTP = async (req, res) => {
 
     await tempUser.save();
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "User already exists in temp database",
       tempUser,
@@ -50,7 +49,7 @@ const addNewOTP = async (req, res) => {
   }
 
   let otp = await createOTP(username);
-  sendOTP(username, otp);
+  await sendOTP(username, otp);
 
   let hashPass = await bcrypt.hash(password, 10);
 
@@ -59,7 +58,9 @@ const addNewOTP = async (req, res) => {
     password: hashPass,
   });
 
-  res.status(201).json({
+  console.log("otp send");
+
+  res.status(200).json({
     success: true,
     message: `OTP is sent successfully to ${username}`,
     User: result,

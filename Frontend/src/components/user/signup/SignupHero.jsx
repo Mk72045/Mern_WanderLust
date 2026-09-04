@@ -25,9 +25,11 @@ function SignupHero() {
 
   async function onSubmit(data) {
     try {
+      console.log("data is: ", data);
       const response = await api.post("/otp", { User: data });
+      console.log("data is response: ", response.data.User);
       const { username, _id } = response.data.User;
-      setUser({ username, _id });
+      setUser({ username, id: _id });
 
       reset();
       navigate("/forgotPassword", {
@@ -40,6 +42,7 @@ function SignupHero() {
         "error occurs at SignupHero.jsx file on submit form and error is: ",
         error,
       );
+      console.log("response error is: ", error.response);
     }
   }
 

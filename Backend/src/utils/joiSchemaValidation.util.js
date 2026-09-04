@@ -48,8 +48,6 @@ export const ReviewSchema = Joi.object({
 
 export const UserSchema = Joi.object({
   User: Joi.object({
-    
-
     username: Joi.string()
       .trim()
       .email({
