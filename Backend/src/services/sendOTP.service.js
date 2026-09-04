@@ -20,15 +20,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// const sendOTP = async (email, otp) => {
-//   await transporter.sendMail({
-//     from: `"SecureAuth" <${EMAIL_USER}>`,
-//     to: email,
-//     subject: "Your SecureAuth OTP",
-//     html: emailTemplate(otp, OTP_EXPIRY_MINUTES),
-//   });
-// };
-
 const sendOTP = async (email, otp) => {
   try {
     const html = emailTemplate(otp, OTP_EXPIRY_MINUTES);
@@ -41,9 +32,15 @@ const sendOTP = async (email, otp) => {
       html,
     });
 
+    console.log("EMAIL SENT SUCCESSFULLY");
+    console.log("Message ID:", info.messageId);
+    console.log("Response:", info.response);
+
     return info;
   } catch (error) {
-    console.error("EMAIL SENDING ERROR:", error);
+    console.error("EMAIL SENDING ERROR:");
+    console.error(error);
+
     throw error;
   }
 };
