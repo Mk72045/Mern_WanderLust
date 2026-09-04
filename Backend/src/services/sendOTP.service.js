@@ -41,9 +41,15 @@ const sendOTP = async (email, otp) => {
       html,
     });
 
+    console.log("EMAIL SENT SUCCESSFULLY");
+    console.log("Message ID:", info.messageId);
+    console.log("Response:", info.response);
+
     return info;
   } catch (error) {
-    console.error("EMAIL SENDING ERROR:", error);
+    console.error("EMAIL SENDING ERROR:");
+    console.error(error);
+
     throw error;
   }
 };
