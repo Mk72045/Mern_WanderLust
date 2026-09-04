@@ -13,15 +13,16 @@ import {
 
 // ========== Joi validated middleware ==========
 import { joiReviewValidation } from "../middlewares/joiSchema.middleware.js";
+import protect from "../middlewares/protect.middleware.js";
 
 router
   .route("/")
   .get(asyncHandler(showAllReveiws))
-  .post(joiReviewValidation, asyncHandler(createReview));
+  .post(protect, joiReviewValidation, asyncHandler(createReview));
 
 router
   .route("/:reviewId")
-  .put(joiReviewValidation, asyncHandler(editReview))
-  .delete(asyncHandler(deleteReview));
+  .put(protect, joiReviewValidation, asyncHandler(editReview))
+  .delete(protect, asyncHandler(deleteReview));
 
 export default router;

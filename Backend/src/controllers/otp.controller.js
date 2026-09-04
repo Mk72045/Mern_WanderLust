@@ -11,21 +11,22 @@ import OTP from "../models/otp.model.js";
 import User from "../models/user.model.js";
 import sendOTP from "../services/sendOTP.service.js";
 import { createOTP } from "../services/createOTP.service.js";
-import generateToken from "../utils/generateToken.util.js";
+
 import TempUser from "../models/tempUser.model.js";
 
 const addNewOTP = async (req, res) => {
+  console.log("otp controller", req.body);
 
-  let { username, email, password } = req.body.User;
+  let { username, password } = req.body.User;
 
-  if (!username || !email || !password) {
+  if (!username || !password) {
     return res.status(400).json({
       success: true,
       message: "fill all the required areas",
     });
   }
 
-  let user = await User.findOne({ email });
+  let user = await User.findOne({ username });
 
   if (user) {
     return res.status(400).json({
@@ -34,34 +35,34 @@ const addNewOTP = async (req, res) => {
     });
   }
 
-  let tempUser = await TempUser.findOne({ email });
+  let tempUser = await TempUser.findOne({ username });
 
   if (tempUser) {
     tempUser.expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
     await tempUser.save();
 
-    return res.status(400).json({
-      success: false,
+    return res.status(200).json({
+      success: true,
       message: "User already exists in temp database",
+      tempUser,
     });
   }
 
-  let otp = await createOTP(email);
-  sendOTP(email, otp);
+  let otp = await createOTP(username);
+  sendOTP(username, otp);
 
   let hashPass = await bcrypt.hash(password, 10);
 
   let result = await TempUser.create({
     username,
-    email,
     password: hashPass,
   });
 
   res.status(201).json({
     success: true,
-    message: `OTP is sent successfully to ${email}`,
-    result,
+    message: `OTP is sent successfully to ${username}`,
+    User: result,
   });
 };
 

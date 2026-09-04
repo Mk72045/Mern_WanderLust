@@ -20,11 +20,24 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// const sendOTP = async (email, otp) => {
+//   await transporter.sendMail({
+//     from: `"SecureAuth" <${EMAIL_USER}>`,
+//     to: email,
+//     subject: "Your SecureAuth OTP",
+//     html: emailTemplate(otp, OTP_EXPIRY_MINUTES),
+//   });
+// };
+
 const sendOTP = async (email, otp) => {
-  await transporter.sendMail({
-    from: EMAIL_USER,
+  const html = emailTemplate(otp, OTP_EXPIRY_MINUTES);
+
+  const info = await transporter.sendMail({
+    from: `"SecureAuth" <${EMAIL_USER}>`,
     to: email,
-    html: emailTemplate(otp, OTP_EXPIRY_MINUTES),
+    subject: "Your SecureAuth OTP",
+    text: emailTemplate(otp, OTP_EXPIRY_MINUTES),
+    html,
   });
 };
 

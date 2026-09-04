@@ -39,10 +39,8 @@ function ReviewForm({ setRefresh }) {
 
       setRefresh((pre) => !pre);
     } catch (error) {
-      console.log("Something went wrong", error);
+      console.log("Something went wrong in ReviewForm.jsx", error);
     }
-
-    // console.log(comment);
   }
   return (
     <div className="pl-1 mt-10">

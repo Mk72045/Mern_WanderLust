@@ -26,7 +26,7 @@ function ReviewHero() {
 
   return (
     <div>
-      <ReviewForm setRefresh={setRefresh} />
+      {user && <ReviewForm setRefresh={setRefresh} />}
       <div className="my-8 pl-1">
         <span>{data.allReviews.length} Comments</span>
         <hr className="mt-2" />

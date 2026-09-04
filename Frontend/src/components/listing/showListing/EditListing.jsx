@@ -44,9 +44,6 @@ function EditListing() {
   useEffect(() => {
     if (!data?.listing) return;
 
-    // console.log("data found:", data);
-
-    // Existing image
     setPreview(data.listing.image);
 
     // Fill form with existing listing data
@@ -88,20 +85,12 @@ function EditListing() {
         sendFormData.append("image", formData.image);
       }
 
-      // Debug FormData
-      for (const [key, value] of sendFormData.entries()) {
-        console.log(key, value);
-      }
-
-      const response = await api.put(`/listings/${listingId}`, sendFormData);
-
-      console.log("Update successful:", response.data);
+      await api.put(`/listings/${listingId}`, sendFormData);
 
       reset();
       navigate(`/listings/${listingId}`);
     } catch (error) {
-      console.error("Update listing failed:", error);
-      console.error("Backend response:", error.response?.data);
+      console.error("Update listing failed error in EditListing.jsx: ", error);
     }
   }
 
@@ -120,7 +109,7 @@ function EditListing() {
 
   return (
     <div className="flex flex-col items-center w-full my-8">
-      <h1>Edit Listing </h1>
+      <h1 className="mb-8!">Edit Listing </h1>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="p-4 flex flex-col gap-10 w-[80%] min-w-85 max-w-200"
@@ -133,7 +122,7 @@ function EditListing() {
               required: "Title is required",
             })}
             placeholder=" "
-            className={`${inputStyle} peer`}
+            className={`${inputStyle}`}
           />
 
           <Label inputId="title" text="Title" />
@@ -169,7 +158,7 @@ function EditListing() {
               required: "Price is required",
             })}
             placeholder=" "
-            className={`${inputStyle} peer`}
+            className={`${inputStyle}`}
           />
 
           <Label inputId="price" text="Price" />

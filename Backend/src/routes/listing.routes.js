@@ -15,18 +15,28 @@ import {
 import { joiListingValidation } from "../middlewares/joiSchema.middleware.js";
 
 import { uploadListingImage } from "../middlewares/cloudinaryUpload.middleware.js";
+import protect from "../middlewares/protect.middleware.js";
 
 const router = express.Router({ mergeParams: true });
 
 router
   .route("/")
   .get(asyncHandler(showAllListings))
-  .post(uploadListingImage.single("image"), joiListingValidation, asyncHandler(addNewListing));
+  .post(
+    protect,
+    uploadListingImage.single("image"),
+    joiListingValidation,
+    asyncHandler(addNewListing)
+  );
 
 router
   .route("/:listingId")
   .get(asyncHandler(showListing))
-  .put(uploadListingImage.single("image"), joiListingValidation, asyncHandler(editListing))
-  .delete(asyncHandler(deleteListing));
+  .put(
+    protect,
+    uploadListingImage.single("image"),
+    joiListingValidation, 
+    asyncHandler(editListing))
+  .delete(protect, asyncHandler(deleteListing));
 
 export default router;

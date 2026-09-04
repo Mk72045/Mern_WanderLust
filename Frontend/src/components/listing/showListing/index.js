@@ -1,3 +1,3 @@
-import ShowListing from "./ShowListing";
+import ShowListingHero from "./ShowListingHero";
 
-export default ShowListing;
+export default ShowListingHero;

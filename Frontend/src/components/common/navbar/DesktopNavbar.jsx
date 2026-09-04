@@ -1,8 +1,5 @@
 import Logo from "./Logo";
-// import SearchBox from "./searchBox";
-// import SearchDropdown from "./searchDropdown";
 import DesktopMenu from "./DesktopMenu";
-
 import StartMenu from "./StartMenu";
 
 function DesktopNavbar({ linkStyle, activeStyle }) {
@@ -11,16 +8,7 @@ function DesktopNavbar({ linkStyle, activeStyle }) {
       <div className="grow-3">
         <Logo />
       </div>
-      {/* <div className="flex justify-center flex-1 px-10">
-        <div className="relative w-full max-w-125">
-          <SearchBox
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
 
-          {search && <SearchDropdown products={filteredProducts} />}
-        </div>
-      </div> */}
       <div className="flex w-[70%] max-w-180 justify-between ">
         <div className="flex self-center">
           <DesktopMenu linkStyle={linkStyle} activeStyle={activeStyle} />

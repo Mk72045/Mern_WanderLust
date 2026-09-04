@@ -4,14 +4,7 @@ import Review from "../models/review.model.js";
 export const showAllReveiws = async (req, res, next) => {
   let { listingId } = req.params;
 
-  let allReviews = await Review.find({ author: listingId });
-
-  // if (allReviews.length === 0) {
-  //   return res.status(404).json({
-  //     success: false,
-  //     message: "Threr are not any review",
-  //   });
-  // }
+  const allReviews = await Review.find({ listing: listingId }).populate("author", "username");
 
   res.status(200).json({
     success: true,
@@ -21,8 +14,7 @@ export const showAllReveiws = async (req, res, next) => {
 };
 
 export const createReview = async (req, res) => {
-  console.log("i am entered");
-  
+  let { id: UserId } = req.User;
   let { listingId } = req.params;
   let { rating, comment } = req.body.Review;
 
@@ -31,7 +23,8 @@ export const createReview = async (req, res) => {
   let result = new Review({
     rating,
     comment,
-    author: listingId,
+    author: UserId,
+    listing: listingId,
   });
 
   await result.save();
@@ -47,9 +40,13 @@ export const createReview = async (req, res) => {
 };
 
 export const deleteReview = async (req, res) => {
-  let { reviewId } = req.params;
+  const { reviewId } = req.params;
+  const { id: UserId } = req.User;
 
-  let result = await Review.findByIdAndDelete(reviewId);
+  const result = await Review.findOneAndDelete({
+    _id: reviewId,
+    author: UserId,
+  });
 
   if (!result) {
     return res.status(404).json({

@@ -5,9 +5,8 @@ import { H1CenterText } from "../ui/Texts";
 import { useLocation } from "react-router-dom";
 
 function HomeHero() {
-  // const [refresh, setRefresh] = useState(false);
   const location = useLocation();
- 
+
   const { data, loading, error } = useFetch(
     "/listings",
     location.state?.update,

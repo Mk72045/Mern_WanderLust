@@ -7,27 +7,16 @@ import {
 } from "../utils/joiSchemaValidation.util.js";
 
 export const joiListingValidation = (req, res, next) => {
-  // console.log("you are at the joi listing file inside hoiSchema.middleware file");
-
-  // console.log("body check at joiLisitng schema", req.body);
-
   if (typeof req.body.Listing === "string") {
     req.body.Listing = JSON.parse(req.body.Listing);
   }
 
-  // console.log("after type check");
-
   let { error } = ListingSchema.validate(req.body);
 
   if (error) {
-    // console.log("error happens in listing validation");
-
     let errorMessage = error.details.map((el) => el.message).join(", ");
     next(new ExpressError(400, errorMessage));
-  } else {
-    // console.log("move further");
-    next();
-  }
+  } else next();
 };
 
 export const joiReviewValidation = (req, res, next) => {
@@ -44,6 +33,7 @@ export const joiUserValidation = (req, res, next) => {
 
   if (error) {
     let errorMessage = error.details.map((el) => el.message).join(", ");
+
     next(new ExpressError(400, errorMessage));
   } else next();
 };

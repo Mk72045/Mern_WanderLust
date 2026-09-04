@@ -4,8 +4,10 @@ import ReviewHero from "./review";
 import { H1CenterText } from "../../ui/Texts";
 import { BlackButton, GreenButton, RedButton } from "../../ui/Button";
 import api from "../../../api/axios";
+import useAuth from "../../../hooks/useAuth.hook";
 
 function ShowListing() {
+  const { user } = useAuth();
   const { listingId } = useParams();
   const navigation = useNavigate();
   const location = useLocation();
@@ -20,7 +22,7 @@ function ShowListing() {
   }
 
   if (error) {
-    console.log("error in showListing is: ", error);
+    console.log("error in showListingHero is: ", error);
     return <H1CenterText text="Listing not found" />;
   }
 
@@ -73,15 +75,17 @@ function ShowListing() {
               <BlackButton text="Back" onClick={handleBack} style="mr-4" />
             </div>
 
-            <div className="tt">
-              <GreenButton
-                text="Edit"
-                onClick={handleListingEdit}
-                style="mr-4"
-              />
+            {user?.id === data?.listing?.owner && (
+              <div className="tt">
+                <GreenButton
+                  text="Edit"
+                  onClick={handleListingEdit}
+                  style="mr-4"
+                />
 
-              <RedButton text="Delete" onClick={handleListingDelete} />
-            </div>
+                <RedButton text="Delete" onClick={handleListingDelete} />
+              </div>
+            )}
           </div>
 
           <ReviewHero />

@@ -1,4 +1,5 @@
 import Listing from "../models/listing.model.js";
+import User from "../models/user.model.js";
 
 export const showAllListings = async (req, res, next) => {
   const listings = await Listing.find({});
@@ -17,6 +18,8 @@ export const showAllListings = async (req, res, next) => {
 };
 
 export const addNewListing = async (req, res, next) => {
+  const { id: userId } = req.User;
+
   const { title, description, price, location, country } = req.body.Listing;
 
   const image = req.file;
@@ -33,6 +36,7 @@ export const addNewListing = async (req, res, next) => {
         : "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/htl-imgs/201410201436324827-36f63773-bdc9-4e5c-baef-10cba1e4575d.jpg",
       filename: image ? image.filename : "default-file",
     },
+    owner: userId,
   });
 
   await newListing.save();
@@ -48,6 +52,7 @@ export const addNewListing = async (req, res, next) => {
 
 export const editListing = async (req, res, next) => {
   const { listingId } = req.params;
+  const { id: userId } = req.User;
 
   const { title, description, price, location, country } = req.body.Listing;
 
@@ -68,12 +73,19 @@ export const editListing = async (req, res, next) => {
     };
   }
 
-  const result = await Listing.findByIdAndUpdate(listingId, upadatListing);
+  const result = await Listing.findOneAndUpdate(
+    {
+      _id: listingId,
+      owner: userId,
+    },
+    upadatListing,
+    { new: true }
+  );
 
   if (!result) {
     return res.status(404).json({
       success: false,
-      message: "listing that you want to edit is not founnd",
+      message: "Listing not found or you are not authorized to update it",
     });
   }
 
@@ -102,13 +114,18 @@ export const showListing = async (req, res, next) => {
 };
 
 export const deleteListing = async (req, res, next) => {
-  let { listingId } = req.params;
-  let listing = await Listing.findByIdAndDelete(listingId);
+  const { listingId } = req.params;
+  const { id: userId } = req.User;
+
+  const listing = await Listing.findOneAndDelete({
+    _id: listingId,
+    owner: userId,
+  });
 
   if (!listing) {
-    return res.status(400).json({
+    return res.status(404).json({
       success: false,
-      message: "listing is not found",
+      message: "Listing not found or you are not authorized",
     });
   }
 

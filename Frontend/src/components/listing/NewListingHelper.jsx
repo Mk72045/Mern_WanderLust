@@ -1,5 +1,3 @@
-
-
 export const Label = ({ inputId = "none", text = "na" }) => {
   return (
     <label
@@ -10,7 +8,9 @@ export const Label = ({ inputId = "none", text = "na" }) => {
         top-0
         -translate-y-1/2
         bg-white
-        px-1
+        rounded-xl
+
+        p-1
 
         text-sm
         text-gray-500

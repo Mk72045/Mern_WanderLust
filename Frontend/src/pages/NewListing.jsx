@@ -83,7 +83,7 @@ function NewListing() {
 
   return (
     <div className="flex flex-col items-center w-full my-8">
-      <h1>AddListing</h1>
+      <h1 className="mb-8!">AddListing</h1>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="p-4 flex flex-col gap-10 w-[80%] min-w-85 max-w-200"

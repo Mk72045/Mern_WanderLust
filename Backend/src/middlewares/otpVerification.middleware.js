@@ -1,20 +1,17 @@
 import bcrypt from "bcrypt";
 
 // ========== file and functions ==========
-import asyncHandler from "../utils/asyncHandler.util.js";
-import sendOTP from "../services/sendOTP.service.js";
-import { createOTP } from "../services/createOTP.service.js";
 import OTP from "../models/otp.model.js";
 
 export const otpVerification = async (req, res, next) => {
-  let { email, otp } = req.body.OTP;
+  let { username, otp } = req.body.OTP;
 
-  let userData = await OTP.findOne({ email });
+  let userData = await OTP.findOne({ username });
 
   if (!userData) {
     return res.status(400).json({
       success: false,
-      message: "OTP is not found out",
+      message: "OTP is not found out! Please try again Signup",
     });
   }
 

@@ -7,7 +7,7 @@ import { Schema, model } from "mongoose";
 
 const optSchema = new Schema(
   {
-    email: {
+    username: {
       type: String,
       required: true,
       lowercase: true,

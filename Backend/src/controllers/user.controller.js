@@ -1,5 +1,11 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
 // ========== packages ==========
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 // ========== files & functions ==========
 
@@ -10,10 +16,10 @@ import generateToken from "../utils/generateToken.util.js";
 // export const signUpForm = (req, res) => {};
 
 export const signUp = async (req, res) => {
-  let { email, opt } = req.body.OTP;
+  let { username, opt } = req.body.OTP;
 
   // checking for existing user
-  let user = await User.findOne({ email });
+  let user = await User.findOne({ username });
 
   if (user) {
     return res.status(400).json({
@@ -22,18 +28,17 @@ export const signUp = async (req, res) => {
     });
   }
 
-  let tempUser = await TempUser.findOne({ email });
+  let tempUser = await TempUser.findOne({ username });
 
   if (!tempUser) {
     return res.status(400).json({
       success: false,
-      message: "Go to signup page and fill required data",
+      message: "Go to signup page and fill required data again",
     });
   }
 
   const newUser = await User.create({
     username: tempUser.username,
-    email: tempUser.email,
     password: tempUser.password,
   });
 
@@ -55,15 +60,15 @@ export const signUp = async (req, res) => {
 // export const loginForm = (req, res) => {};
 
 export const login = async (req, res) => {
-  let { email, password } = req.body.User;
-  if (!email || !password) {
+  let { username, password } = req.body.User;
+  if (!username || !password) {
     return res.status(400).json({
       success: false,
       message: "enter required credentials",
     });
   }
 
-  let user = await User.findOne({ email });
+  let user = await User.findOne({ username });
 
   if (!user) {
     return res.status(400).json({
@@ -77,7 +82,7 @@ export const login = async (req, res) => {
   if (!isMatch) {
     return res.status(400).json({
       success: false,
-      message: "Invalid Email or Password",
+      message: "Invalid Username or Password",
     });
   }
 
@@ -92,7 +97,36 @@ export const login = async (req, res) => {
   res.status(200).json({
     success: true,
     message: "login successful",
+    User: user,
   });
+};
+
+export const currentUser = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+
+    // if (!token) {
+    //   return res.status(401).json({
+    //     success: false,
+    //     message: "User is not logged in",
+    //   });
+    // }
+
+    if (token) {
+      const decoded = jwt.verify(token, JWT_SECRET);
+
+      return res.status(200).json({
+        success: true,
+        message: "User found successfully",
+        user: decoded,
+      });
+    }
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
 };
 
 export const logout = (req, res) => {

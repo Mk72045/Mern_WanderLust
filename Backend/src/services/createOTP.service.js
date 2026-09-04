@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 
 // ===== storing otp in database =====
 
-export const createOTP = async (email) => {
+export const createOTP = async (username) => {
   // Generate plain OTP
   const otp = otpGenerator();
 
@@ -13,10 +13,10 @@ export const createOTP = async (email) => {
 
   // Store hashed OTP
   await OTP.create({
-    email,
+    username,
     otp: hashedOTP,
   });
 
-  // Return plain OTP to send via email
+  // Return plain OTP to send via username
   return otp;
 };

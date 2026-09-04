@@ -48,13 +48,9 @@ export const ReviewSchema = Joi.object({
 
 export const UserSchema = Joi.object({
   User: Joi.object({
-    username: Joi.string().trim().min(3).max(30).required().messages({
-      "string.empty": "Username is required",
-      "string.min": "Username must be at least 3 characters",
-      "string.max": "Username cannot exceed 30 characters",
-    }),
+    
 
-    email: Joi.string()
+    username: Joi.string()
       .trim()
       .email({
         tlds: { allow: false }, // Allows .com, .in, .dev, etc.
@@ -66,6 +62,7 @@ export const UserSchema = Joi.object({
       }),
 
     password: Joi.string()
+      .trim()
       .min(8)
       .max(30)
       .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_+\-=[\]{};':"\\|,.<>/?]).+$/)
@@ -82,8 +79,9 @@ export const UserSchema = Joi.object({
 
 export const OtpSchema = Joi.object({
   OTP: Joi.object({
-    email: Joi.string()
+    username: Joi.string()
       .trim()
+      .lowercase()
       .email({ tlds: { allow: false } })
       .required()
       .messages({

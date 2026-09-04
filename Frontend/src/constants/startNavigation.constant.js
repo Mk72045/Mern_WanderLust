@@ -1,15 +1,15 @@
 const startButtonNavigation = [
   {
     name: "Login",
-    path: "/",
+    path: "/login",
   },
   {
-    name: "Signout",
-    path: "/",
+    name: "Signup",
+    path: "/signup",
   },
   {
     name: "Logout",
-    path: "/",
+    path: "",
   },
 ];
 

@@ -3,7 +3,7 @@ import asyncHandler from "../utils/asyncHandler.util.js";
 
 // ========== functions from controllers ==========
 
-import { signUp, login, logout } from "../controllers/user.controller.js";
+import { signUp, login, logout, currentUser } from "../controllers/user.controller.js";
 import { otpVerification } from "../middlewares/otpVerification.middleware.js";
 
 // ========== Joi validated middleware ==========
@@ -21,6 +21,10 @@ router
 router
   .route("/login")
   .post(asyncHandler(login));
+
+router
+  .route("/")
+  .get(asyncHandler(currentUser));
 
 router
   .route("/logout")
