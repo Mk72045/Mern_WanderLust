@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const NODE_ENV = process.env.NODE_ENV;
 
 // ========== packages ==========
 import bcrypt from "bcrypt";
@@ -13,12 +12,10 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import TempUser from "../models/tempUser.model.js";
 import generateToken from "../utils/generateToken.util.js";
-
-// export const signUpForm = (req, res) => {};
+import cookieOptions from "../utils/cookieOptions.js";
 
 export const signUp = async (req, res) => {
   let { username } = req.body.OTP;
-  const isProduction = NODE_ENV === "production";
 
   // checking for existing user
   let user = await User.findOne({ username });
@@ -46,11 +43,7 @@ export const signUp = async (req, res) => {
 
   let token = await generateToken(newUser._id);
 
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-  });
+  res.cookie("token", token, cookieOptions);
 
   res.status(201).json({
     success: true,
@@ -63,7 +56,6 @@ export const signUp = async (req, res) => {
 
 export const login = async (req, res) => {
   let { username, password } = req.body.User;
-  const isProduction = NODE_ENV === "production";
 
   if (!username || !password) {
     return res.status(400).json({
@@ -92,11 +84,7 @@ export const login = async (req, res) => {
 
   let token = await generateToken(user._id);
 
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-  });
+  res.cookie("token", token, cookieOptions);
 
   res.status(200).json({
     success: true,
@@ -109,15 +97,20 @@ export const currentUser = async (req, res) => {
   try {
     const token = req.cookies.token;
 
-    if (token) {
-      const decoded = jwt.verify(token, JWT_SECRET);
-
-      return res.status(200).json({
-        success: true,
-        message: "User found successfully",
-        user: decoded,
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
       });
     }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    return res.status(200).json({
+      success: true,
+      message: "User found successfully",
+      user: decoded,
+    });
   } catch (error) {
     return res.status(401).json({
       success: false,
@@ -127,7 +120,7 @@ export const currentUser = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("token", cookieOptions);
   res.status(200).json({
     success: true,
     message: "logout successful",
