@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const NODE_ENV = process.env.NODE_ENV;
 
 // ========== packages ==========
 import bcrypt from "bcrypt";
@@ -17,6 +18,7 @@ import generateToken from "../utils/generateToken.util.js";
 
 export const signUp = async (req, res) => {
   let { username } = req.body.OTP;
+  const isProduction = NODE_ENV === "production";
 
   // checking for existing user
   let user = await User.findOne({ username });
@@ -46,8 +48,8 @@ export const signUp = async (req, res) => {
 
   res.cookie("token", token, {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
 
   res.status(201).json({
@@ -61,6 +63,8 @@ export const signUp = async (req, res) => {
 
 export const login = async (req, res) => {
   let { username, password } = req.body.User;
+  const isProduction = NODE_ENV === "production";
+
   if (!username || !password) {
     return res.status(400).json({
       success: false,
@@ -90,8 +94,8 @@ export const login = async (req, res) => {
 
   res.cookie("token", token, {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
 
   res.status(200).json({
