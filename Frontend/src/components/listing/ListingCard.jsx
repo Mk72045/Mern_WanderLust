@@ -24,7 +24,7 @@ function ListingCard({ listing }) {
         />
         <div className="flex flex-col p-2">
           <h2 className="">{listing.title}</h2>
-          <p className="font-semibold">{listing.price}</p>
+          <p className="font-semibold">&#8377;{listing.price}</p>
         </div>
       </div>
     </NavLink>

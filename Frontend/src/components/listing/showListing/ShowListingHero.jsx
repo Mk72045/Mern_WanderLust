@@ -60,7 +60,7 @@ function ShowListing() {
               <b>Description:</b> {data.listing.description}
             </p>
             <p className="font-semibold py-1">
-              <b>Price: </b> {data.listing.price}
+              <b>Price: </b> &#8377;{data.listing.price}
             </p>
             <p className="font-semibold py-1">
               <b>Country: </b> {data.listing.country}

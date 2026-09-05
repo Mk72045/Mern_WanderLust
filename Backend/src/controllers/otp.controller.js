@@ -12,11 +12,8 @@ import sendOTP from "../services/sendOTP.service.js";
 import { createOTP } from "../services/createOTP.service.js";
 
 import TempUser from "../models/tempUser.model.js";
-import OTP from "../models/otp.model.js";
 
 const addNewOTP = async (req, res) => {
-  console.log("otp controller", req.body);
-
   const { username, password } = req.body.User;
 
   if (!username || !password) {
@@ -59,8 +56,6 @@ const addNewOTP = async (req, res) => {
     username,
     password: hashPass,
   });
-
-  console.log("otp send");
 
   res.status(200).json({
     success: true,

@@ -2,44 +2,52 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // ========== dotenv file data ==========
-const EMAIL_USER = process.env.EMAIL_USER;
-const EMAIL_PASS = process.env.EMAIL_PASS;
+const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL;
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const OTP_EXPIRY_MINUTES = process.env.OTP_EXPIRY_MINUTES;
 
 // ========== packages ==========
-import nodemailer from "nodemailer";
+import axios from "axios";
 
 // ========== files and functions importing ==========
 import emailTemplate from "../scripts/emailTemplate.script.js";
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS,
-  },
-});
 
 const sendOTP = async (email, otp) => {
   try {
     const html = emailTemplate(otp, OTP_EXPIRY_MINUTES);
 
-    const info = await transporter.sendMail({
-      from: `"SecureAuth" <${EMAIL_USER}>`,
-      to: email,
-      subject: "Your SecureAuth OTP",
-      text: emailTemplate(otp, OTP_EXPIRY_MINUTES),
-      html,
-    });
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "WanderLust SecureAuth",
+          email: BREVO_SENDER_EMAIL,
+        },
 
-    console.log("EMAIL SENT SUCCESSFULLY");
-    console.log("Message ID:", info.messageId);
-    console.log("Response:", info.response);
+        to: [
+          {
+            email: email,
+          },
+        ],
 
-    return info;
+        subject: "Your WanderLust OTP",
+
+        htmlContent: html,
+
+        textContent: `Your WanderLust OTP is ${otp}. It expires in ${OTP_EXPIRY_MINUTES} minutes.`,
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "api-key": BREVO_API_KEY,
+          "content-type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
   } catch (error) {
-    console.error("EMAIL SENDING ERROR:");
-    console.error(error);
+    console.error("BREVO EMAIL ERROR:", error.response?.data || error.message);
 
     throw error;
   }

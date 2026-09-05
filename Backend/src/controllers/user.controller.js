@@ -16,8 +16,6 @@ import generateToken from "../utils/generateToken.util.js";
 // export const signUpForm = (req, res) => {};
 
 export const signUp = async (req, res) => {
-  console.log("in signup function at use.controller file: ", req.body);
-
   let { username } = req.body.OTP;
 
   // checking for existing user
@@ -106,13 +104,6 @@ export const login = async (req, res) => {
 export const currentUser = async (req, res) => {
   try {
     const token = req.cookies.token;
-
-    // if (!token) {
-    //   return res.status(401).json({
-    //     success: false,
-    //     message: "User is not logged in",
-    //   });
-    // }
 
     if (token) {
       const decoded = jwt.verify(token, JWT_SECRET);

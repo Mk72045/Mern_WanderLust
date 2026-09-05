@@ -26,11 +26,10 @@ function LoginHero({ path = "/" }) {
 
   async function onSubmit(data) {
     try {
-      console.log("data is: ", data);
       const response = await api.post("/user/login", { User: data });
       const { username, _id } = response.data.User;
       setUser({ username, id: _id });
-      // console.log("LoginHero.jsx response is: ", response);
+      
       reset();
       navigate(path);
     } catch (error) {

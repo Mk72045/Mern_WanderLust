@@ -25,7 +25,7 @@ const reInsertData = async () => {
 
     // Add owner to every listing
     for (let i = 0; i < data.length; i++) {
-      data[i].owner = "6a99011b3eb3c8cf157a0239";
+      data[i].owner = "6a9beef5bc2dee0bda6f3d3e";
     }
 
     // Insert new listings
