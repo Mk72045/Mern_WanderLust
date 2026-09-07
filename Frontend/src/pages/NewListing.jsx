@@ -2,22 +2,28 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import Button from "@mui/material/Button";
-import useAuth from "../hooks/useAuth.hook.js";
 
-// ========== components &
+// ========== import functions ==========
+import useAuth from "../hooks/useAuth.hook.js";
+import useApiRequest from "../utils/useApiRequest.js";
+import { compressImageTo1MB } from "../components/listing/showListing/imageReducer.js";
+import api from "../api/axios.js";
+
+// ========== components ==========
 import {
   ErrorText,
   inputStyle,
   Label,
 } from "../components/listing/NewListingHelper";
 import { BlackButton, GreenButton } from "../components/ui/Button";
-import { compressImageTo1MB } from "../components/listing/showListing/imageReducer.js";
-import api from "../api/axios.js";
 
 function NewListing() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { request } = useApiRequest();
+
   const initialState = {
     title: "",
     description: "",
@@ -38,43 +44,46 @@ function NewListing() {
   } = useForm({ defaultValues: initialState });
 
   const onSubmit = async (data) => {
-    try {
-      if (!user) {
-        navigate("/");
-        return;
-      }
-
-      const formData = new FormData();
-
-      const Listing = {
-        title: data.title,
-        description: data.description,
-        price: data.price,
-        location: data.location,
-        country: data.country,
-      };
-
-      formData.append("Listing", JSON.stringify(Listing));
-
-      if (data.image instanceof File) {
-        formData.append("image", data.image);
-      }
-
-      await api.post("/listings", formData);
-
-      setImage({
-        url: null,
-        filename: null,
-      });
-
-      reset();
-      navigate("/");
-    } catch (e) {
-      console.log("error at submission of newListing", e);
+    if (!user) {
+      toast.error("User must be logged in first");
+      navigate("/login");
+      return;
     }
+
+    const formData = new FormData();
+
+    const Listing = {
+      title: data.title,
+      description: data.description,
+      price: data.price,
+      location: data.location,
+      country: data.country,
+    };
+
+    formData.append("Listing", JSON.stringify(Listing));
+
+    if (data.image instanceof File) {
+      formData.append("image", data.image);
+    }
+
+    const { error } = await request(() => api.post("/listings", formData), {
+      loadingMessage: "Creating listing...",
+      successMessage: "Listing created!",
+    });
+
+    if (error) return;
+
+    setImage({
+      url: null,
+      filename: null,
+    });
+
+    reset();
+    navigate("/");
   };
 
   async function handleImageChange(e) {
+    const toastId = toast.loading("Image Uploading...");
     const file = e.target.files?.[0];
 
     if (!file) return;
@@ -86,6 +95,7 @@ function NewListing() {
     setImage({ url: previewUrl, filename: image1mb.name });
 
     setValue("image", image1mb, { shouldDirty: true });
+    toast.success("Image Uploaded", { id: toastId });
   }
 
   return (
@@ -255,9 +265,11 @@ function NewListing() {
             <GreenButton text="AddListing" type="Submit" style="ml-4" />
           )}
         </div>
-        <div className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
-          You must be logged in to add a listing!
-        </div>
+        {!user && (
+          <div className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+            You must be logged in to add a listing!
+          </div>
+        )}
       </form>
     </div>
   );

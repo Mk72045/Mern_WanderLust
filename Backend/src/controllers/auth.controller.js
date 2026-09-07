@@ -1,33 +1,47 @@
-export const getCurrentUser = async (req, res) => {
-  try {
-    const token = req.cookies.token;
+import dotenv from "dotenv";
+dotenv.config();
 
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authenticated",
-      });
-    }
+const JWT_SECRET = process.env.JWT_SECRET;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+import ExpressError from "../utils/expressError.util.js";
+import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
 
-    const user = await User.findById(decoded.userId).select("-password");
+const getCurrentUser = async (req, res) => {
+  const token = req.cookies.token;
+  // console.log("at auth.controller");
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
+  if (!token) {
+    // console.log("in token ");
 
-    return res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid or expired token",
-    });
+    throw new ExpressError(401, "Not authenticated");
   }
+
+  // console.log("token", token);
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch (jwtErr) {
+    throw new ExpressError(401, "Invalid or expired token");
+  }
+
+  // console.log("decoded", decoded);
+
+  const user = await User.findById(decoded.id).select("-password");
+
+  // console.log("user", user);
+
+  if (!user) {
+    throw new ExpressError(404, "User not found");
+  }
+
+  // console.log("user", user);
+
+  return res.status(200).json({
+    success: true,
+    user,
+  });
 };
+
+export default getCurrentUser;

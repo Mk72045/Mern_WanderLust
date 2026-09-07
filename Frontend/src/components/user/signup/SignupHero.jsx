@@ -5,12 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { PasswordInputArea } from "../UserHelper";
 import api from "../../../api/axios";
-import useAuth from "../../../hooks/useAuth.hook";
+import useApiRequest from "../../../utils/useApiRequest";
 
 function SignupHero() {
   const navigate = useNavigate();
   const [eye, setEye] = useState(false);
-  const { setUser } = useAuth();
+
+  const { request } = useApiRequest();
   const initialValues = {
     username: "",
     password: "",
@@ -24,24 +25,19 @@ function SignupHero() {
   } = useForm({ defaultValues: initialValues });
 
   async function onSubmit(data) {
-    try {
-      const response = await api.post("/otp", { User: data });
+    const { error } = await request(() => api.post("/otp", { User: data }), {
+      loadingMessage: "Sending OTP...",
+      successMessage: "OTP sent successfully",
+    });
 
-      const { username, _id } = response.data.User;
-      setUser({ username, id: _id });
+    if (error) return;
 
-      reset();
-      navigate("/forgotPassword", {
-        state: {
-          username: data.username,
-        },
-      });
-    } catch (error) {
-      console.log(
-        "error occurs at SignupHero.jsx file on submit form and error is: ",
-        error,
-      );
-    }
+    reset();
+    navigate("/forgotPassword", {
+      state: {
+        username: data.username,
+      },
+    });
   }
 
   return (
@@ -81,6 +77,41 @@ function SignupHero() {
             condition={errors?.password}
             message={errors?.password?.message}
           />
+        </div>
+
+        <div className="mt-2 text-sm text-red-500">
+          {" "}
+          <span className="font-medium">Password must:</span>{" "}
+          <ul className="mt-1 list-disc list-inside space-y-1">
+            {" "}
+            <li>
+              Be atleast <span className="font-semibold">8 characters</span>{" "}
+              long
+            </li>{" "}
+            <li>
+              Contain at least{" "}
+              <span className="font-semibold">one uppercase letter</span> (A-Z)
+            </li>{" "}
+            <li>
+              Contain at least{" "}
+              <span className="font-semibold">one lowercase letter</span> (a-z)
+            </li>{" "}
+            <li>
+              Contain at least <span className="font-semibold">one number</span>{" "}
+              (0-9)
+            </li>{" "}
+            <li>
+              {" "}
+              Contain at least{" "}
+              <span className="font-semibold">one special character</span> (@,
+              $, !, %, *, ?, &, #, etc.){" "}
+            </li>{" "}
+          </ul>{" "}
+          <div className="mt-2">
+            {" "}
+            <span className="font-medium">Example:</span>{" "}
+            <span className="font-semibold">Secure@123</span>{" "}
+          </div>{" "}
         </div>
 
         <div className="text-right pr-2">

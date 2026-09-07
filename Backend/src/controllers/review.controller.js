@@ -8,7 +8,10 @@ export const showAllReveiws = async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "reveiws are fetched successfully",
+    message:
+      allReviews.length === 0
+        ? "No reviews found for this listing"
+        : "Reviews fetched successfully",
     allReviews,
   });
 };
@@ -20,6 +23,10 @@ export const createReview = async (req, res) => {
 
   let listing = await Listing.findById(listingId);
 
+  if (!listing) {
+    throw new ExpressError(404, "Listing not found");
+  }
+
   let result = new Review({
     rating,
     comment,
@@ -29,13 +36,13 @@ export const createReview = async (req, res) => {
 
   await result.save();
 
-  listing.reviews.push(result);
-
+  listing.reviews.push(result._id);
   await listing.save();
 
-  return res.status(200).json({
+  res.status(201).json({
     success: true,
-    message: "review is created successfully",
+    message: "Review created successfully",
+    review: result,
   });
 };
 
@@ -49,34 +56,16 @@ export const deleteReview = async (req, res) => {
   });
 
   if (!result) {
-    return res.status(404).json({
-      success: false,
-      message: "review is not fond to delete",
-    });
+    throw new ExpressError(404, "Review not found or you are not authorized to delete it");
   }
+  console.log("at review controller result at deletion is: ", result);
 
-  res.status(200).json({
-    success: true,
-    message: "review is deleted successfully",
+  await Listing.findByIdAndUpdate(result.listing, {
+    $pull: { reviews: result._id },
   });
-};
-
-export const editReview = async (req, res) => {
-  let { reviewId } = req.params;
-
-  let reviewData = req.body.Review;
-
-  let result = await Review.findByIdAndUpdate(reviewId, reviewData);
-
-  if (!result) {
-    return res.status(404).json({
-      success: true,
-      message: "review not found to edit",
-    });
-  }
 
   res.status(200).json({
     success: true,
-    message: "review is edited successfully",
+    message: "Review deleted successfully",
   });
 };

@@ -2,9 +2,14 @@ import bcrypt from "bcrypt";
 
 // ========== file and functions ==========
 import OTP from "../models/otp.model.js";
+import ExpressError from "../utils/expressError.util.js";
 
 export const otpVerification = async (req, res, next) => {
   let { username, otp } = req.body.OTP;
+
+  if (!username || !otp) {
+    throw new ExpressError(400, "Username and OTP are required");
+  }
 
   username = username.trim();
   otp = otp.trim();
@@ -12,19 +17,13 @@ export const otpVerification = async (req, res, next) => {
   let userData = await OTP.findOne({ username });
 
   if (!userData) {
-    return res.status(400).json({
-      success: false,
-      message: "OTP is not found out! Please try again Signup",
-    });
+    throw new ExpressError(400, "OTP not found. Please try signing up again");
   }
 
   let isMatch = await bcrypt.compare(otp, userData.otp);
 
   if (!isMatch) {
-    return res.status(400).json({
-      success: false,
-      message: "wrong OTP",
-    });
+    throw new ExpressError(400, "Incorrect OTP");
   }
 
   next();

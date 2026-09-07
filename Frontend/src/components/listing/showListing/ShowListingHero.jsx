@@ -5,12 +5,14 @@ import { H1CenterText } from "../../ui/Texts";
 import { BlackButton, GreenButton, RedButton } from "../../ui/Button";
 import api from "../../../api/axios";
 import useAuth from "../../../hooks/useAuth.hook";
+import useApiRequest from "../../../utils/useApiRequest.js";
 
 function ShowListing() {
   const { user } = useAuth();
   const { listingId } = useParams();
-  const navigation = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
+  const { request } = useApiRequest();
 
   const { data, loading, error } = useFetch(
     `/listings/${listingId}`,
@@ -27,13 +29,21 @@ function ShowListing() {
   }
 
   function handleListingEdit() {
-    navigation(`/listings/${listingId}/editListing`);
+    navigate(`/listings/${listingId}/editListing`);
   }
 
   async function handleListingDelete() {
-    await api.delete(`/listings/${listingId}`);
+    const { error } = await request(
+      () => api.delete(`/listings/${listingId}`),
+      {
+        loadingMessage: "Deleting listing...",
+        successMessage: "Listing deleted successfully",
+      },
+    );
 
-    navigation("/", {
+    if (error) return;
+
+    navigate("/", {
       state: {
         update: Date.now(),
       },
@@ -41,7 +51,7 @@ function ShowListing() {
   }
 
   function handleBack() {
-    navigation("/");
+    navigate("/");
   }
 
   return (

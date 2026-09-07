@@ -7,16 +7,21 @@ import {
   Label,
 } from "../components/listing/NewListingHelper";
 import api from "../api/axios";
+import useAuth from "../hooks/useAuth.hook";
+import useApiRequest from "../utils/useApiRequest";
 
 function ForgotPassword({ path = "/" }) {
   const location = useLocation();
   const username = location.state?.username;
   const navigate = useNavigate();
+  const { setUser } = useAuth();
+  const { request } = useApiRequest();
 
   const initialValues = {
     username,
     otp: "",
   };
+
   const {
     register,
     reset,
@@ -25,22 +30,29 @@ function ForgotPassword({ path = "/" }) {
   } = useForm({ defaultValues: initialValues });
 
   async function onSubmit(data) {
-    try {
-      // console.log("data is: ", data);
-      await api.post("/user/signup", { OTP: data });
-      // console.log("response at ForgotPassword.jsx file: ", response);
-      reset();
-      navigate(path);
-    } catch (error) {
-      console.log(
-        "error in onsubmit function at ForgotPassword.jsx file: ",
-        error,
-      );
-      console.log(
-        "in onsubmit function at ForgotPassword.jsx file backend response is: ",
-        error.response,
-      );
-    }
+    const { data: result, error } = await request(
+      () => api.post("/user/signup", { OTP: data }),
+      {
+        loadingMessage: "Verifying OTP...",
+        successMessage: "Account created successfully",
+      },
+    );
+
+    setUser(
+      result?.newUser && {
+        User: {
+          id: result.newUser._id,
+          username: result.newUser.username,
+        },
+      },
+    );
+
+    console.log("after OTP", result);
+
+    if (error) return;
+
+    reset();
+    navigate(path);
   }
 
   return (

@@ -4,16 +4,10 @@ import User from "../models/user.model.js";
 export const showAllListings = async (req, res, next) => {
   const listings = await Listing.find({});
 
-  if (listings.length === 0) {
-    return res.status(404).json({
-      success: false,
-      message: "No Listings Found",
-    });
-  }
-
   res.status(200).json({
     success: true,
     listings,
+    message: listings.length === 0 ? "No listings found" : "Listings fetched successfully",
   });
 };
 
@@ -24,6 +18,9 @@ export const addNewListing = async (req, res, next) => {
 
   const image = req.file;
 
+  const DEFAULT_LISTING_IMAGE =
+    "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/htl-imgs/201410201436324827-36f63773-bdc9-4e5c-baef-10cba1e4575d.jpg";
+
   const newListing = new Listing({
     title,
     description,
@@ -31,9 +28,7 @@ export const addNewListing = async (req, res, next) => {
     location,
     country,
     image: {
-      url: image
-        ? image.path
-        : "https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/htl-imgs/201410201436324827-36f63773-bdc9-4e5c-baef-10cba1e4575d.jpg",
+      url: image ? image.path : DEFAULT_LISTING_IMAGE,
       filename: image ? image.filename : "default-file",
     },
     owner: userId,
@@ -47,8 +42,6 @@ export const addNewListing = async (req, res, next) => {
     listing: newListing,
   });
 };
-
-// export const editListingForm = async (req, res, next) => {};
 
 export const editListing = async (req, res, next) => {
   const { listingId } = req.params;
@@ -83,10 +76,7 @@ export const editListing = async (req, res, next) => {
   );
 
   if (!result) {
-    return res.status(404).json({
-      success: false,
-      message: "Listing not found or you are not authorized to update it",
-    });
+    throw new ExpressError(404, "Listing not found or you are not authorized to update it");
   }
 
   res.status(200).json({
@@ -100,10 +90,7 @@ export const showListing = async (req, res, next) => {
   let listing = await Listing.findById(listingId).populate("reviews");
 
   if (!listing) {
-    return res.status(400).json({
-      success: false,
-      message: "listing is not found",
-    });
+    throw new ExpressError(404, "Listing not found");
   }
 
   res.status(200).json({
@@ -123,14 +110,11 @@ export const deleteListing = async (req, res, next) => {
   });
 
   if (!listing) {
-    return res.status(404).json({
-      success: false,
-      message: "Listing not found or you are not authorized",
-    });
+    throw new ExpressError(404, "Listing not found or you are not authorized to delete it");
   }
 
   res.status(200).json({
     success: true,
-    message: "listing is deleted successfully",
+    message: "Listing deleted successfully",
   });
 };

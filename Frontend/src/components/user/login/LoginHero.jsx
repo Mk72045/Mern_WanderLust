@@ -6,11 +6,13 @@ import { BlueTextButton, PasswordInputArea } from "../UserHelper";
 import { useState } from "react";
 import api from "../../../api/axios";
 import useAuth from "../../../hooks/useAuth.hook";
+import useApiRequest from "../../../utils/useApiRequest";
 
 function LoginHero({ path = "/" }) {
   const [eye, setEye] = useState(false);
   const navigate = useNavigate();
   const { setUser } = useAuth();
+  const { request } = useApiRequest();
   const initialValues = {
     username: "",
     password: "",
@@ -25,16 +27,20 @@ function LoginHero({ path = "/" }) {
   } = useForm({ defaultValues: initialValues });
 
   async function onSubmit(data) {
-    try {
-      const response = await api.post("/user/login", { User: data });
-      const { username, _id } = response.data.User;
-      setUser({ username, id: _id });
-      
-      reset();
-      navigate(path);
-    } catch (error) {
-      console.log("error in LoginHero.jsx file: ", error);
-    }
+    const { data: result, error } = await request(
+      () => api.post("/user/login", { User: data }),
+      { loadingMessage: "Logging in...", successMessage: "Login successful!" },
+    );
+
+    if (error) return;
+
+    setUser({
+      id: result.User._id,
+      username: result.User.username,
+    });
+
+    reset();
+    navigate(path);
   }
 
   return (

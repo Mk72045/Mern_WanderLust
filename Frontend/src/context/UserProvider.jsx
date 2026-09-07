@@ -3,21 +3,28 @@ import api from "../api/axios";
 import UserContext from "./UserContext";
 
 import { useState } from "react";
+import useApiRequest from "../utils/useApiRequest";
 
 const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const { request } = useApiRequest();
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const response = await api.get("/user");
+      const { data: result, error } = await request(() => api.get("/user"), {
+        silent: true,
+      });
 
-        setUser(response?.data?.user);
-      } catch (error) {
+      if (error || !result?.user) {
         setUser(null);
-        console.log("error in UserPorvider.jsx file: ", error);
+        return;
       }
+      setUser({
+        id: result.user._id,
+        username: result.user.username,
+      });
     };
+
     fetchUser();
   }, []);
 

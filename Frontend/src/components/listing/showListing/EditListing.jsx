@@ -9,9 +9,12 @@ import Button from "@mui/material/Button";
 import { BlackButton, GreenButton } from "../../ui/Button";
 import { compressImageTo1MB } from "./imageReducer";
 import api from "../../../api/axios";
+import useApiRequest from "../../../utils/useApiRequest";
+import { toast } from "sonner";
 
 function EditListing() {
   const { listingId } = useParams();
+  const { request } = useApiRequest();
   const [preview, setPreview] = useState({
     url: null,
     filename: null,
@@ -67,34 +70,39 @@ function EditListing() {
   }
 
   async function onSubmit(formData) {
-    try {
-      const sendFormData = new FormData();
+    const sendFormData = new FormData();
 
-      const Listing = {
-        title: formData.title,
-        description: formData.description,
-        price: formData.price,
-        location: formData.location,
-        country: formData.country,
-      };
+    const Listing = {
+      title: formData.title,
+      description: formData.description,
+      price: formData.price,
+      location: formData.location,
+      country: formData.country,
+    };
 
-      sendFormData.append("Listing", JSON.stringify(Listing));
+    sendFormData.append("Listing", JSON.stringify(Listing));
 
-      // Only send image if a new image was selected
-      if (formData.image instanceof File) {
-        sendFormData.append("image", formData.image);
-      }
-
-      await api.put(`/listings/${listingId}`, sendFormData);
-
-      reset();
-      navigate(`/listings/${listingId}`);
-    } catch (error) {
-      console.error("Update listing failed error in EditListing.jsx: ", error);
+    // Only send image if a new image was selected
+    if (formData.image instanceof File) {
+      sendFormData.append("image", formData.image);
     }
+
+    const { error } = await request(
+      () => api.put(`/listings/${listingId}`, sendFormData),
+      {
+        loadingMessage: "Updating listing...",
+        successMessage: "Listing updated successfully",
+      },
+    );
+
+    if (error) return;
+
+    reset();
+    navigate(`/listings/${listingId}`);
   }
 
   async function handleImageChange(e) {
+    const toastId = toast.loading("Image Uploading...");
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -105,6 +113,7 @@ function EditListing() {
     setValue("image", image1mb, {
       shouldDirty: true,
     });
+    toast.success("Image Uploaded", { id: toastId });
   }
 
   return (

@@ -2,20 +2,25 @@ import api from "../../../api/axios";
 import startButtonNavigation from "../../../constants/startNavigation.constant";
 import useAuth from "../../../hooks/useAuth.hook";
 import { NavLink, useNavigate } from "react-router-dom";
+import useApiRequest from "../../../utils/useApiRequest";
 
 function StartMenu({ linkStyle, activeStyle }) {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
+  const { request } = useApiRequest();
 
   async function logout() {
-    try {
-      await api.get("/user/logout");
-      setUser(null);
+    await api.get("/user/logout");
+    const { error } = await request(() => api.get("/user/logout"), {
+      loadingMessage: "Logging out...",
+      successMessage: "Logged out successfully",
+    });
 
-      navigate("/");
-    } catch (error) {
-      console.log("error at logout button ", error);
-    }
+    if (error) return;
+
+    setUser(null);
+
+    navigate("/");
   }
 
   return (

@@ -6,15 +6,14 @@ const JWT_SECRET = process.env.JWT_SECRET;
 import jwt from "jsonwebtoken";
 
 import asyncHandler from "../utils/asyncHandler.util.js";
+import ExpressError from "../utils/expressError.util.js";
+
 
 const protect = asyncHandler(async (req, res, next) => {
   let { token } = req.cookies;
 
   if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: "login required",
-    });
+    throw new ExpressError(401, "You must be logged in!");
   }
 
   let decoded = await jwt.verify(token, JWT_SECRET);

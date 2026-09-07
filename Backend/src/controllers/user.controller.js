@@ -13,27 +13,22 @@ import User from "../models/user.model.js";
 import TempUser from "../models/tempUser.model.js";
 import generateToken from "../utils/generateToken.util.js";
 import cookieOptions from "../utils/cookieOptions.js";
+import OTP from "../models/otp.model.js";
+import ExpressError from "../utils/expressError.util.js";
 
 export const signUp = async (req, res) => {
   let { username } = req.body.OTP;
 
-  // checking for existing user
   let user = await User.findOne({ username });
 
   if (user) {
-    return res.status(400).json({
-      success: false,
-      message: "user already exists",
-    });
+    throw new ExpressError(409, "User already exists");
   }
 
   let tempUser = await TempUser.findOne({ username });
 
   if (!tempUser) {
-    return res.status(400).json({
-      success: false,
-      message: "Go to signup page and fill required data again",
-    });
+    throw new ExpressError(400, "Go to signup page and fill required data again");
   }
 
   const newUser = await User.create({
@@ -45,6 +40,9 @@ export const signUp = async (req, res) => {
 
   res.cookie("token", token, cookieOptions);
 
+  await TempUser.deleteOne({ username });
+  await OTP.deleteOne({ username });
+
   res.status(201).json({
     success: true,
     message: "Account created successfully",
@@ -52,34 +50,27 @@ export const signUp = async (req, res) => {
   });
 };
 
-// export const loginForm = (req, res) => {};
-
 export const login = async (req, res) => {
+  if (!req.body.User) {
+    throw new ExpressError(400, "User data is required");
+  }
+
   let { username, password } = req.body.User;
 
   if (!username || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "enter required credentials",
-    });
+    throw new ExpressError(400, "Please enter username and password");
   }
 
   let user = await User.findOne({ username });
 
   if (!user) {
-    return res.status(400).json({
-      success: false,
-      message: "User Not Found",
-    });
+    throw new ExpressError(401, "Invalid username or password");
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid Username or Password",
-    });
+    throw new ExpressError(401, "Invalid username or password");
   }
 
   let token = await generateToken(user._id);
@@ -88,41 +79,15 @@ export const login = async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: "login successful",
+    message: "Login successful",
     User: user,
   });
-};
-
-export const currentUser = async (req, res) => {
-  try {
-    const token = req.cookies.token;
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    const decoded = jwt.verify(token, JWT_SECRET);
-
-    return res.status(200).json({
-      success: true,
-      message: "User found successfully",
-      user: decoded,
-    });
-  } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid or expired token",
-    });
-  }
 };
 
 export const logout = (req, res) => {
   res.clearCookie("token", cookieOptions);
   res.status(200).json({
     success: true,
-    message: "logout successful",
+    message: "Logout successful",
   });
 };

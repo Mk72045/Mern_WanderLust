@@ -12,24 +12,19 @@ import sendOTP from "../services/sendOTP.service.js";
 import { createOTP } from "../services/createOTP.service.js";
 
 import TempUser from "../models/tempUser.model.js";
+import ExpressError from "../utils/expressError.util.js";
 
 const addNewOTP = async (req, res) => {
   const { username, password } = req.body.User;
 
   if (!username || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "fill all the required areas",
-    });
+    throw new ExpressError(400, "Please fill all the required fields");
   }
 
   const user = await User.findOne({ username });
 
   if (user) {
-    return res.status(200).json({
-      success: false,
-      message: "User already exists",
-    });
+    throw new ExpressError(409, "User already exists");
   }
 
   const tempUser = await TempUser.findOne({ username });
@@ -39,10 +34,12 @@ const addNewOTP = async (req, res) => {
 
     await tempUser.save();
 
+    const newOtp = await createOTP(username);
+    await sendOTP(username, newOtp);
+
     return res.status(200).json({
       success: true,
-      message: "User already exists in temp database",
-      tempUser,
+      message: `OTP resent successfully to ${username}`,
     });
   }
 
