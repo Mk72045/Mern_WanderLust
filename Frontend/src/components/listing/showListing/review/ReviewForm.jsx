@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import Rating from "@mui/material/Rating";
 import api from "../../../../api/axios";
 import { useParams } from "react-router-dom";
+import useApiRequest from "../../../../utils/useApiRequest";
 
 function ReviewForm({ setRefresh }) {
   const [comment, setComment] = useState("");
@@ -12,6 +13,7 @@ function ReviewForm({ setRefresh }) {
   const [errorText, setErrorText] = useState("");
   const [rating, setRating] = useState(2);
   const [submit, setSubmit] = useState(false);
+  const { request } = useApiRequest();
 
   const { listingId } = useParams();
 
@@ -20,27 +22,29 @@ function ReviewForm({ setRefresh }) {
 
     if (!comment.trim()) {
       setError(true);
-      setErrorText("you need to write your comment first");
+      setErrorText("You need to write your comment first");
       return;
     }
 
-    try {
-      await api.post(`/listings/${listingId}/reviews`, {
-        Review: {
-          comment,
-          rating,
-        },
-      });
+    const { error: apiError } = await request(
+      () =>
+        api.post(`/listings/${listingId}/reviews`, {
+          Review: { comment, rating },
+        }),
+      {
+        loadingMessage: "Posting review...",
+        successMessage: "Review posted successfully",
+      },
+    );
 
-      setComment("");
-      setError(false);
-      setErrorText("");
-      setRating(2);
+    if (apiError) return;
 
-      setRefresh((pre) => !pre);
-    } catch (error) {
-      console.log("Something went wrong in ReviewForm.jsx", error);
-    }
+    setComment("");
+    setError(false);
+    setErrorText("");
+    setRating(2);
+
+    setRefresh((pre) => !pre);
   }
   return (
     <div className="pl-1 mt-10">

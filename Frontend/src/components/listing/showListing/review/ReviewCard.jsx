@@ -3,13 +3,26 @@ import { RedButton } from "../../../ui/Button";
 import api from "../../../../api/axios";
 import { useParams } from "react-router-dom";
 import useAuth from "../../../../hooks/useAuth.hook";
+import useApiRequest from "../../../../utils/useApiRequest.js";
 
 function ReviewCard({ review, setRefresh }) {
   const { listingId } = useParams();
   const { user } = useAuth();
+  const { request } = useApiRequest();
 
-  function handleReviewDelete() {
-    api.delete(`/listings/${listingId}/reviews/${review._id}`);
+  async function handleReviewDelete() {
+    // api.delete(`/listings/${listingId}/reviews/${review._id}`);
+
+    const { error } = await request(
+      () => api.delete(`/listings/${listingId}/reviews/${review._id}`),
+      {
+        loadingMessage: "Deleting review...",
+        successMessage: "Review deleted successfully",
+      },
+    );
+
+    if (error) return;
+
     setRefresh((pre) => !pre);
   }
 
