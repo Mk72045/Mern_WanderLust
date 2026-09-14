@@ -4,15 +4,16 @@ import api from "../../../../api/axios";
 import { useParams } from "react-router-dom";
 import useAuth from "../../../../hooks/useAuth.hook";
 import useApiRequest from "../../../../utils/useApiRequest.js";
+import { useState } from "react";
+import Popup from "../../../ui/Popup.jsx";
 
 function ReviewCard({ review, setRefresh }) {
   const { listingId } = useParams();
   const { user } = useAuth();
   const { request } = useApiRequest();
+  const [openPopup, setOpenPopup] = useState(false);
 
   async function handleReviewDelete() {
-    // api.delete(`/listings/${listingId}/reviews/${review._id}`);
-
     const { error } = await request(
       () => api.delete(`/listings/${listingId}/reviews/${review._id}`),
       {
@@ -34,6 +35,15 @@ function ReviewCard({ review, setRefresh }) {
 
   return (
     <>
+      <Popup
+        open={openPopup}
+        onClose={() => setOpenPopup(false)}
+        apiCall={handleReviewDelete}
+        message="Are you sure you want to delete this review?"
+        focus="delete"
+        successMessage="Review deleted successfully"
+        loadingMessage="Review deleting..."
+      />
       {review && (
         <div className="mb-8 shadow p-4 rounded-2xl ">
           <div className="mb-4 flex items-center">
@@ -45,7 +55,12 @@ function ReviewCard({ review, setRefresh }) {
           {user?.id === review?.author?._id && (
             <div className="text-right">
               <span className="tt">
-                <RedButton text="Delete" onClick={handleReviewDelete} />{" "}
+                <RedButton
+                  text="Delete"
+                  onClick={() => {
+                    setOpenPopup(true);
+                  }}
+                />{" "}
               </span>
             </div>
           )}

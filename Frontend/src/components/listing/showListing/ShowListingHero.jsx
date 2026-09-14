@@ -6,6 +6,8 @@ import { BlackButton, GreenButton, RedButton } from "../../ui/Button";
 import api from "../../../api/axios";
 import useAuth from "../../../hooks/useAuth.hook";
 import useApiRequest from "../../../utils/useApiRequest.js";
+import { useState } from "react";
+import Popup from "../../ui/Popup.jsx";
 
 function ShowListing() {
   const { user } = useAuth();
@@ -13,6 +15,7 @@ function ShowListing() {
   const navigate = useNavigate();
   const location = useLocation();
   const { request } = useApiRequest();
+  const [openPopup, setOpenPopup] = useState(false);
 
   const { data, loading, error } = useFetch(
     `/listings/${listingId}`,
@@ -36,7 +39,7 @@ function ShowListing() {
     const { error } = await request(
       () => api.delete(`/listings/${listingId}`),
       {
-        loadingMessage: "Deleting listing...",
+        loadingMessage: "Listing deleting...",
         successMessage: "Listing deleted successfully",
       },
     );
@@ -56,6 +59,14 @@ function ShowListing() {
 
   return (
     <>
+      <Popup
+        open={openPopup}
+        onClose={() => setOpenPopup(false)}
+        apiCall={handleListingDelete}
+        message="Are you sure you want to delete this Listing?"
+        focus="delete"
+      />
+
       {data?.listing && (
         <div className="flex flex-col w-[80%] min-w-70 max-w-200 mx-auto ">
           <img
@@ -93,7 +104,12 @@ function ShowListing() {
                   style="mr-4"
                 />
 
-                <RedButton text="Delete" onClick={handleListingDelete} />
+                <RedButton
+                  text="Delete"
+                  onClick={() => {
+                    setOpenPopup(true);
+                  }}
+                />
               </div>
             )}
           </div>

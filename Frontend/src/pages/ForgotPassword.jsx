@@ -47,8 +47,6 @@ function ForgotPassword({ path = "/" }) {
       },
     );
 
-    console.log("after OTP", result);
-
     if (error) return;
 
     reset();

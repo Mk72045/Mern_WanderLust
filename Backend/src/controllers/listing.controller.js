@@ -2,7 +2,7 @@ import Listing from "../models/listing.model.js";
 import User from "../models/user.model.js";
 
 export const showAllListings = async (req, res, next) => {
-  const listings = await Listing.find({});
+  const listings = await Listing.find({}).sort({ createdAt: -1 });
 
   res.status(200).json({
     success: true,

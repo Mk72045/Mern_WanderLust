@@ -58,7 +58,6 @@ export const deleteReview = async (req, res) => {
   if (!result) {
     throw new ExpressError(404, "Review not found or you are not authorized to delete it");
   }
-  console.log("at review controller result at deletion is: ", result);
 
   await Listing.findByIdAndUpdate(result.listing, {
     $pull: { reviews: result._id },

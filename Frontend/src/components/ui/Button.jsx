@@ -5,10 +5,12 @@ export const GreenButton = ({
   type = "button",
   style = "",
   onClick = () => {},
+  autoFocus = false,
 }) => (
   <button
     type={type}
-    className={`${style} border  p-2 rounded-xl hover:bg-green-300 hover:border-green-300 transition hover:text-white duration-200 `}
+    autoFocus={autoFocus}
+    className={`${style} max-[400px]:bg-green-300 max-[400px]:hover:shadow-xl  border  p-2 rounded-xl hover:bg-green-300 hover:border-green-300 transition hover:text-white duration-200 `}
     onClick={onClick}
   >
     {text}
@@ -20,9 +22,11 @@ export const RedButton = ({
   type = "button",
   style = "",
   onClick = () => {},
+  autoFocus = false,
 }) => (
   <button
     type={type}
+    autoFocus={autoFocus}
     className={`${style} border  p-2 rounded-xl hover:bg-red-300 hover:border-red-300 transition hover:text-white duration-200 `}
     onClick={onClick}
   >
@@ -35,9 +39,11 @@ export const BlackButton = ({
   type = "button",
   style = "",
   onClick = () => {},
+  autoFocus = false,
 }) => (
   <button
     type={type}
+    autoFocus={autoFocus}
     className={`${style} border  p-2 rounded-xl hover:bg-black hover:border-black transition hover:text-white duration-200 `}
     onClick={onClick}
   >

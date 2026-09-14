@@ -2,11 +2,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import { NavLink } from "react-router-dom";
 import navigationLinks from "../../../constants/navigation.constant";
 import Logo from "./Logo";
+import useAuth from "../../../hooks/useAuth.hook.js";
+import DeleteAccount from "./DeleteAccount";
 
 function MobileDrawer({ open, setOpen }) {
+  const { user } = useAuth();
   return (
     <>
-      {/* Background Overlay */}
       <div
         onClick={() => setOpen(false)}
         className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
@@ -27,8 +29,6 @@ function MobileDrawer({ open, setOpen }) {
           </button>
         </div>
 
-        {/* Navigation */}
-
         <nav className="flex flex-col mt-4 h-full px-4">
           {navigationLinks.map((link) => (
             <NavLink
@@ -40,6 +40,9 @@ function MobileDrawer({ open, setOpen }) {
               {link.name}
             </NavLink>
           ))}
+          {user && (
+            <DeleteAccount style="w-full px-6 py-4 bg-red-400 text-white/90 hover:bg-red-600 hover:text-white transition text-xl shadow-sm hover:shadow-md my-2 rounded-2xl" />
+          )}
         </nav>
       </aside>
     </>
