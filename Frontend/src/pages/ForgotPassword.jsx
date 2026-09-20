@@ -40,10 +40,8 @@ function ForgotPassword({ path = "/" }) {
 
     setUser(
       result?.newUser && {
-        User: {
-          id: result.newUser._id,
-          username: result.newUser.username,
-        },
+        id: result.newUser._id,
+        username: result.newUser.username,
       },
     );
 

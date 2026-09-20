@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { BlackButton, RedButton } from "./Button";
 
 import { useForm } from "react-hook-form";
@@ -22,7 +23,7 @@ function Popup({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
         <div className="mb-6">
@@ -52,7 +53,8 @@ function Popup({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
