@@ -91,8 +91,45 @@ export const logout = (req, res) => {
   });
 };
 
+export const forgotPassword = async (req, res) => {
+  const { username, password } = req.body.OTP;
+
+  if (!username || !password) {
+    throw new ExpressError(400, "Please enter username and password");
+  }
+
+  const user = await User.findOne({ username });
+
+  if (!user) {
+    return res.status(404).json({
+      message: "User not found",
+    });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const updatedUser = await User.findOneAndUpdate(
+    { username },
+    { $set: { password: hashedPassword } },
+    { new: true, runValidators: true }
+  );
+
+  await OTP.deleteOne({ username });
+
+  let token = await generateToken(user._id);
+  res.cookie("token", token, cookieOptions);
+
+  return res.status(200).json({
+    success: true,  
+    message: "Password changed successfully",
+    result: {
+      id: updatedUser._id,
+      username: updatedUser.username,
+    },
+  });
+};
+
 export const deleteUser = async (req, res) => {
-  console.log("user in delte use", req.User);
   const { id: userId } = req.User;
 
   const user = await User.findOneAndDelete({
@@ -103,18 +140,11 @@ export const deleteUser = async (req, res) => {
     throw new ExpressError(404, "User account not found.");
   }
 
-  console.log("user after deletion", user);
-
   const listings = await Listing.find({
     owner: user._id,
   }).select("_id");
 
-
-  console.log("listings", listings);
-
   const listingIds = listings.map((listing) => listing._id);
-
-  console.log("listingIds after deletion", listingIds);
 
   await Review.deleteMany({
     $or: [{ author: user._id }, { listing: { $in: listingIds } }],

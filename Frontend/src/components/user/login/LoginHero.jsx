@@ -23,7 +23,6 @@ function LoginHero({ path = "/" }) {
     reset,
     handleSubmit,
     formState: { errors, isDirty },
-    // setValue,
   } = useForm({ defaultValues: initialValues });
 
   async function onSubmit(data) {

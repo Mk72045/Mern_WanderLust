@@ -13,7 +13,9 @@ import EditListing from "./components/listing/showListing/EditListing";
 import NewListing from "./pages/NewListing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import OtpVerification from "./pages/OtpVerification";
 import ForgotPassword from "./pages/ForgotPassword";
+
 import PageNotFound from "./pages/PageNotFound";
 
 function App() {
@@ -32,6 +34,7 @@ function App() {
           <Route path="/newListing" element={<NewListing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/otpVerification" element={<OtpVerification />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="*" element={<PageNotFound />} />
         </Route>

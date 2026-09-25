@@ -10,9 +10,9 @@ import api from "../api/axios";
 import useAuth from "../hooks/useAuth.hook";
 import useApiRequest from "../utils/useApiRequest";
 
-function ForgotPassword({ path = "/" }) {
+function OtpVerification({ path = "/" }) {
   const location = useLocation();
-  const username = location.state?.username;
+  const { username, requestPath, password, type } = location.state;
   const navigate = useNavigate();
   const { setUser } = useAuth();
   const { request } = useApiRequest();
@@ -30,20 +30,36 @@ function ForgotPassword({ path = "/" }) {
   } = useForm({ defaultValues: initialValues });
 
   async function onSubmit(data) {
+    const updatedData = {
+      ...data,
+      password,
+    };
     const { data: result, error } = await request(
-      () => api.post("/user/signup", { OTP: data }),
+      () => api.post(requestPath, { OTP: updatedData }),
       {
         loadingMessage: "Verifying OTP...",
-        successMessage: "Account created successfully",
+        successMessage:
+          type === "newUser"
+            ? "Account created successfully"
+            : "Password Changed successfully",
       },
     );
 
-    setUser(
-      result?.newUser && {
-        id: result.newUser._id,
-        username: result.newUser.username,
-      },
-    );
+    if (type === "newUser") {
+      setUser(
+        result?.newUser && {
+          id: result.newUser._id,
+          username: result.newUser.username,
+        },
+      );
+    } else {
+      setUser(
+        result?.result && {
+          id: result.result.id,
+          username: result.result.username,
+        },
+      );
+    }
 
     if (error) return;
 
@@ -98,4 +114,4 @@ function ForgotPassword({ path = "/" }) {
   );
 }
 
-export default ForgotPassword;
+export default OtpVerification;

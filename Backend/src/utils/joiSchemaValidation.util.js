@@ -72,6 +72,11 @@ export const UserSchema = Joi.object({
           "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
         "string.empty": "Password is required",
       }),
+
+    state: Joi.string().trim().valid("newUser", "newPass").default("newUser").messages({
+      "any.only": "Invalid request type",
+      "string.empty": "Request type is required",
+    }),
   }).required(),
 });
 
@@ -88,6 +93,17 @@ export const OtpSchema = Joi.object({
         "string.empty": "Email is required",
       }),
 
+    password: Joi.string()
+      .trim()
+      .min(8)
+      .max(128)
+      .optional()
+      .messages({
+        "string.min": "Password must be at least 8 characters",
+        "string.max": "Password cannot exceed 128 characters",
+        "string.empty": "Password cannot be empty",
+    }),
+
     otp: Joi.string()
       .trim()
       .pattern(/^[0-9]{6}$/)
@@ -97,5 +113,11 @@ export const OtpSchema = Joi.object({
         "any.required": "OTP is required",
         "string.empty": "OTP is required",
       }),
+
+    state: Joi.string().trim().valid("newUser", "newPass").messages({
+      "any.only": "Invalid request type",
+      "any.required": "Request type is required",
+      "string.empty": "Request type is required",
+    }),
   }).required(),
 });
