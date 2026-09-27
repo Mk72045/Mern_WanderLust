@@ -138,6 +138,9 @@ sketch
 
 
 node_modules
+Aws
+
+.pem
 
 
 dist
