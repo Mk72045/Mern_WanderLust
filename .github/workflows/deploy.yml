@@ -1,4 +1,4 @@
-name: Test EC2 Connection
+name: Deploy WanderLust
 
 on:
   push:
@@ -6,23 +6,45 @@ on:
       - main
 
 jobs:
-  test-ssh:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test SSH connection
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+
           script: |
-            echo "WanderLust Connected to EC2 successfully!"
-            echo "Current user:"
-            whoami
+            set -e
 
-            echo "Current directory:"
-            pwd
+            echo "🚀 Starting deployment..."
 
-            echo "Server:"
-            hostname
+            cd /home/ubuntu/Mern_WanderLust
+
+            echo "📥 Pulling latest code..."
+            git pull origin main
+
+            echo "📦 Installing backend dependencies..."
+            cd Backend
+            npm ci
+
+            echo "🔄 Restarting backend..."
+            pm2 restart wanderlust-backend --update-env
+
+            echo "📦 Installing frontend dependencies..."
+            cd ../Frontend
+            npm ci
+
+            echo "🏗️ Building frontend..."
+            npm run build
+
+            echo "🔍 Testing Nginx configuration..."
+            sudo nginx -t
+
+            echo "🔄 Reloading Nginx..."
+            sudo systemctl reload nginx
+
+            echo "✅ Deployment completed successfully!"
