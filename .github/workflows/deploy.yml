@@ -89,17 +89,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build backend image
+      - name: Build Backend image
         run: |
           docker build \
             -t mk180/mern-wanderlust-backend:latest \
-            ./backend
+            ./Backend
 
-      - name: Build frontend image
+      - name: Build Frontend image
         run: |
           docker build \
             -t mk180/mern-wanderlust-frontend:latest \
-            ./frontend
+            ./Frontend
 
       - name: Push backend image
         run: |
