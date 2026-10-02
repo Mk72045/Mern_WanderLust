@@ -1,3 +1,70 @@
+# name: Deploy WanderLust
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Deploy to EC2
+#         uses: appleboy/ssh-action@v1.2.2
+#         with:
+#           host: ${{ secrets.EC2_HOST }}
+#           username: ${{ secrets.EC2_USERNAME }}
+#           key: ${{ secrets.EC2_SSH_KEY }}
+
+#           script: |
+#             set -e
+
+#             echo "🚀 Starting deployment..."
+
+#              export NVM_DIR="$HOME/.nvm"
+#             source "$NVM_DIR/nvm.sh"
+#             nvm use 24.21.0
+
+#             echo "Node version:"
+#             node -v
+
+#             echo "NPM version:"
+#             npm -v
+
+#             echo "PM2 version:"
+#             pm2 -v
+
+#             cd /home/ubuntu/Mern_WanderLust
+
+#             echo "📥 Pulling latest code..."
+#             git pull origin main
+
+#             echo "📦 Installing backend dependencies..."
+#             cd Backend
+#             npm ci
+
+#             echo "🔄 Restarting backend..."
+#             pm2 restart wanderlust-backend --update-env
+
+#             echo "📦 Installing frontend dependencies..."
+#             cd ../Frontend
+#             npm ci
+
+#             echo "🏗️ Building frontend..."
+#             npm run build
+
+#             echo "🔍 Testing Nginx configuration..."
+#             sudo nginx -t
+
+#             echo "🔄 Reloading Nginx..."
+#             sudo systemctl reload nginx
+
+#             echo "✅ Deployment completed successfully!"
+
+
+
+
 name: Deploy WanderLust
 
 on:
@@ -6,58 +73,79 @@ on:
       - main
 
 jobs:
-  deploy:
+
+  # ==========================================
+  # BUILD AND PUSH DOCKER IMAGES
+  # ==========================================
+
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.2.2
+
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-          script: |
-            set -e
+      - name: Build backend image
+        run: |
+          docker build \
+            -t mk180/wanderlust:backend \
+            ./backend
 
-            echo "🚀 Starting deployment..."
+      - name: Build frontend image
+        run: |
+          docker build \
+            -t mk180/wanderlust:frontend \
+            ./frontend
 
-             export NVM_DIR="$HOME/.nvm"
-            source "$NVM_DIR/nvm.sh"
-            nvm use 24.21.0
+      - name: Push backend image
+        run: |
+          docker push mk180/wanderlust:backend
 
-            echo "Node version:"
-            node -v
+      - name: Push frontend image
+        run: |
+          docker push mk180/wanderlust:frontend
 
-            echo "NPM version:"
-            npm -v
 
-            echo "PM2 version:"
-            pm2 -v
+  # ==========================================
+  # DEPLOY IMAGES TO EC2
+  # ==========================================
 
-            cd /home/ubuntu/Mern_WanderLust
+  deploy:
+    needs: build-and-push
 
-            echo "📥 Pulling latest code..."
-            git pull origin main
+    runs-on: self-hosted
 
-            echo "📦 Installing backend dependencies..."
-            cd Backend
-            npm ci
+    steps:
 
-            echo "🔄 Restarting backend..."
-            pm2 restart wanderlust-backend --update-env
+      - name: Deploy latest Docker images
+        run: |
+          set -e
 
-            echo "📦 Installing frontend dependencies..."
-            cd ../Frontend
-            npm ci
+          echo "🚀 Starting Docker deployment..."
 
-            echo "🏗️ Building frontend..."
-            npm run build
+          cd /home/ubuntu/Mern_WanderLust
 
-            echo "🔍 Testing Nginx configuration..."
-            sudo nginx -t
+          echo "📥 Pulling latest backend and frontend images..."
 
-            echo "🔄 Reloading Nginx..."
-            sudo systemctl reload nginx
+          docker compose -f docker.yml pull backend frontend
 
-            echo "✅ Deployment completed successfully!"
+          echo "🔄 Recreating containers with new images..."
+
+          docker compose -f docker.yml up -d --force-recreate backend frontend
+
+          echo "🔍 Checking container status..."
+
+          docker compose -f docker.yml ps
+
+          echo "🧹 Cleaning unused Docker images..."
+
+          docker image prune -f
+
+          echo "✅ Deployment completed successfully!"
