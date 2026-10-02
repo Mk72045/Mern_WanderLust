@@ -64,7 +64,6 @@
 
 
 
-
 name: Deploy WanderLust
 
 on:
@@ -74,9 +73,7 @@ on:
 
 jobs:
 
-  # ==========================================
   # BUILD AND PUSH DOCKER IMAGES
-  # ==========================================
 
   build-and-push:
     runs-on: ubuntu-latest
@@ -95,31 +92,29 @@ jobs:
       - name: Build backend image
         run: |
           docker build \
-            -t mk180/wanderlust:backend \
+            -t mk180/mern-wanderlust-backend:latest \
             ./backend
 
       - name: Build frontend image
         run: |
           docker build \
-            -t mk180/wanderlust:frontend \
+            -t mk180/mern-wanderlust-frontend:latest \
             ./frontend
 
       - name: Push backend image
         run: |
-          docker push mk180/wanderlust:backend
+          docker push mk180/mern-wanderlust-backend:latest
 
       - name: Push frontend image
         run: |
-          docker push mk180/wanderlust:frontend
+          docker push mk180/mern-wanderlust-frontend:latest
 
 
-  # ==========================================
+          
   # DEPLOY IMAGES TO EC2
-  # ==========================================
 
   deploy:
     needs: build-and-push
-
     runs-on: self-hosted
 
     steps:
