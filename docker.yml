@@ -23,20 +23,18 @@ services:
       - mongo
 
   backend:
-    build:
-      context: ./Backend
-      dockerfile: Dockerfile
+    image: mk180/mern-wanderlust-backend:latest
+    restart: always
     ports:
       - "5000:5000"
     env_file:
-      - ./backend/.env
+      - ./Backend/.env
     depends_on:
       - mongo
 
   frontend:
-    build:
-      context: ./Frontend
-      dockerfile: Dockerfile
+    image: mk180/mern-wanderlust-frontend:latest
+    restart: always
     ports:
       - "8080:80"
     depends_on:
