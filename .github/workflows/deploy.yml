@@ -62,8 +62,6 @@
 
 #             echo "✅ Deployment completed successfully!"
 
-
-
 name: Deploy WanderLust
 
 on:
@@ -72,14 +70,12 @@ on:
       - main
 
 jobs:
-
   # BUILD AND PUSH DOCKER IMAGES
 
   build-and-push:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout source code
         uses: actions/checkout@v4
 
@@ -109,8 +105,6 @@ jobs:
         run: |
           docker push mk180/mern-wanderlust-frontend:latest
 
-
-          
   # DEPLOY IMAGES TO EC2
 
   deploy:
@@ -118,7 +112,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-
       - name: Deploy latest Docker images
         run: |
           set -e
