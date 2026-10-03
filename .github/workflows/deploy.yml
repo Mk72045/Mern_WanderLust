@@ -93,7 +93,8 @@ jobs:
 
       - name: Build Frontend image
         run: |
-          docker build \
+          docker build \  
+            --build-arg VITE_API_URL=/api \
             -t mk180/mern-wanderlust-frontend:latest \
             ./Frontend
 
@@ -118,22 +119,37 @@ jobs:
 
           echo "🚀 Starting Docker deployment..."
 
-          cd /home/ubuntu/Mern_WanderLust
+          APP_DIR="/home/ubuntu/Mern_WanderLust"
+          cd "$APP_DIR"
 
           echo "📥 Pulling latest backend and frontend images..."
 
-          docker compose -f docker.yml pull backend frontend
+          if [ ! -f "./Backend/.env" ]; then
+            echo "❌ Missing $APP_DIR/Backend/.env on the server."
+            echo "   Create it manually on EC2 (same as your local Backend/.env). It is not stored in Git."
+            exit 1
+          fi
 
-          echo "🔄 Recreating containers with new images..."
+          # Old PM2/nginx setup often keeps port 80 busy — Docker frontend needs it
+          if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet nginx; then
+            echo "⚠️ Stopping system nginx so the frontend container can use port 80..."
+            sudo systemctl stop nginx
+          fi
 
-          docker compose -f docker.yml up -d --force-recreate backend frontend
+          echo "📥 Pulling latest images from Docker Hub..."
+          docker compose -f docker.yml pull
 
-          echo "🔍 Checking container status..."
+          echo "🔄 Starting / recreating all containers..."
+          docker compose -f docker.yml up -d --force-recreate --remove-orphans
 
+          echo "🔍 Container status:"
           docker compose -f docker.yml ps
 
-          echo "🧹 Cleaning unused Docker images..."
+          echo "🌐 Checking frontend on port 80..."
+          sleep 3
+          curl -fsS http://127.0.0.1/ >/dev/null
 
+          echo "🧹 Cleaning unused Docker images..."
           docker image prune -f
 
           echo "✅ Deployment completed successfully!"
