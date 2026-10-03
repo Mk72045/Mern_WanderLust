@@ -1,67 +1,3 @@
-# name: Deploy WanderLust
-
-# on:
-#   push:
-#     branches:
-#       - main
-
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Deploy to EC2
-#         uses: appleboy/ssh-action@v1.2.2
-#         with:
-#           host: ${{ secrets.EC2_HOST }}
-#           username: ${{ secrets.EC2_USERNAME }}
-#           key: ${{ secrets.EC2_SSH_KEY }}
-
-#           script: |
-#             set -e
-
-#             echo "🚀 Starting deployment..."
-
-#              export NVM_DIR="$HOME/.nvm"
-#             source "$NVM_DIR/nvm.sh"
-#             nvm use 24.21.0
-
-#             echo "Node version:"
-#             node -v
-
-#             echo "NPM version:"
-#             npm -v
-
-#             echo "PM2 version:"
-#             pm2 -v
-
-#             cd /home/ubuntu/Mern_WanderLust
-
-#             echo "📥 Pulling latest code..."
-#             git pull origin main
-
-#             echo "📦 Installing backend dependencies..."
-#             cd Backend
-#             npm ci
-
-#             echo "🔄 Restarting backend..."
-#             pm2 restart wanderlust-backend --update-env
-
-#             echo "📦 Installing frontend dependencies..."
-#             cd ../Frontend
-#             npm ci
-
-#             echo "🏗️ Building frontend..."
-#             npm run build
-
-#             echo "🔍 Testing Nginx configuration..."
-#             sudo nginx -t
-
-#             echo "🔄 Reloading Nginx..."
-#             sudo systemctl reload nginx
-
-#             echo "✅ Deployment completed successfully!"
-
 name: Deploy WanderLust
 
 on:
@@ -70,6 +6,7 @@ on:
       - main
 
 jobs:
+
   # BUILD AND PUSH DOCKER IMAGES
 
   build-and-push:
@@ -86,25 +23,17 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Backend image
-        run: |
-          docker build \
-            -t mk180/mern-wanderlust-backend:latest \
-            ./Backend
+        run: docker build -t mk180/mern-wanderlust-backend:latest ./Backend
 
       - name: Build Frontend image
-        run: |
-          docker build \  
-            --build-arg VITE_API_URL=/api \
-            -t mk180/mern-wanderlust-frontend:latest \
-            ./Frontend
+        run: docker build --build-arg VITE_API_URL=/api -t mk180/mern-wanderlust-frontend:latest ./Frontend
 
       - name: Push backend image
-        run: |
-          docker push mk180/mern-wanderlust-backend:latest
+        run: docker push mk180/mern-wanderlust-backend:latest
 
       - name: Push frontend image
-        run: |
-          docker push mk180/mern-wanderlust-frontend:latest
+        run: docker push mk180/mern-wanderlust-frontend:latest
+
 
   # DEPLOY IMAGES TO EC2
 
@@ -122,18 +51,10 @@ jobs:
           APP_DIR="/home/ubuntu/Mern_WanderLust"
           cd "$APP_DIR"
 
-          echo "📥 Pulling latest backend and frontend images..."
-
           if [ ! -f "./Backend/.env" ]; then
             echo "❌ Missing $APP_DIR/Backend/.env on the server."
-            echo "   Create it manually on EC2 (same as your local Backend/.env). It is not stored in Git."
+            echo "Create it manually on EC2."
             exit 1
-          fi
-
-          # Old PM2/nginx setup often keeps port 80 busy — Docker frontend needs it
-          if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet nginx; then
-            echo "⚠️ Stopping system nginx so the frontend container can use port 80..."
-            sudo systemctl stop nginx
           fi
 
           echo "📥 Pulling latest images from Docker Hub..."

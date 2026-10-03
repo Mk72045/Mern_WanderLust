@@ -2,7 +2,7 @@ name: Mern_WanderLust
 
 services:
   mongo:
-    image: mongo
+    image: mongo:7.0
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
@@ -28,7 +28,6 @@ services:
     ports:
       - "5000:5000"
     environment:
-      # Must match nginx proxy (frontend) and published port
       PORT: "5000"
     env_file:
       - ./Backend/.env
